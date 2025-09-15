@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم فندق قاعود</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <style>
+        :root {
+            --color-primary-gold: #D4AF37;
+            --color-dark-brown: #5D4037;
+            --color-cream: #EFEBE9;
+            --color-white: #FFFFFF;
+            --color-dark: #212121;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: var(--color-cream);
+            transition: padding-right 0.3s ease;
+        }
+
+        .main-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 260px;
+            background-color: var(--color-dark-brown);
+            color: var(--color-white);
+            position: fixed;
+            top: 0;
+            right: 0;
+            height: 100%;
+            transition: right 0.3s ease;
+            z-index: 1030;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar.collapsed {
+            right: -260px;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header h3 {
+            color: var(--color-primary-gold);
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .sidebar-nav {
+            flex-grow: 1;
+            padding: 1rem 0;
+        }
+
+        .sidebar-nav .nav-link {
+            color: var(--color-white);
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .sidebar-nav .nav-link:hover,
+        .sidebar-nav .nav-link.active {
+            background-color: var(--color-primary-gold);
+            color: var(--color-dark-brown);
+        }
+        
+        .sidebar-nav .nav-link.active .fa-fw{
+            color: var(--color-dark-brown);
+        }
+        
+        .sidebar-nav .nav-link .fa-fw {
+             color: var(--color-primary-gold);
+             transition: color 0.2s;
+        }
+        
+         .sidebar-nav .nav-link:hover .fa-fw {
+            color: var(--color-dark-brown);
+        }
+
+        .sidebar-footer {
+            padding: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            margin-right: 260px;
+            transition: margin-right 0.3s ease;
+        }
+
+        .main-content.collapsed {
+            margin-right: 0;
+        }
+
+        .topbar {
+            background-color: var(--color-white);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .topbar .btn-logout {
+            color: var(--color-dark-brown);
+        }
+
+        .stat-card {
+            background-color: var(--color-white);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            text-align: center;
+            color: var(--color-dark-brown);
+            border-left: 5px solid var(--color-primary-gold);
+        }
+
+        .stat-card h5 {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--color-dark);
+        }
+
+        .stat-card .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--color-dark-brown);
+        }
+
+        .stat-card .icon {
+            font-size: 2rem;
+            color: var(--color-primary-gold);
+            margin-bottom: 1rem;
+        }
+
+        .table-responsive {
+            background-color: var(--color-white);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .table thead {
+            background-color: var(--color-dark-brown);
+            color: var(--color-primary-gold);
+        }
+        
+        .btn-primary {
+            background-color: var(--color-dark-brown);
+            border-color: var(--color-dark-brown);
+        }
+        
+        .btn-primary:hover {
+            background-color: #4a322a;
+            border-color: #4a322a;
+        }
+
+        .modal-content {
+            border-radius: 0.5rem;
+        }
+        
+        .modal-header{
+           background-color: var(--color-dark-brown);
+           color: var(--color-primary-gold);
+        }
+        
+        .modal-header .btn-close{
+            filter: invert(1) grayscale(100%) brightness(200%);
+        }
+
+        .login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .login-box {
+            background: var(--color-white);
+            padding: 2rem;
+            border-radius: 0.5rem;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .login-box h4{
+            color: var(--color-dark-brown);
+        }
+
+        .badge-status {
+            padding: 0.5em 0.75em;
+            font-size: 0.8em;
+            font-weight: 500;
+        }
+
+        .badge-pending { background-color: #ffc107; color: #000; }
+        .badge-processing { background-color: #0d6efd; color: #fff; }
+        .badge-completed { background-color: #198754; color: #fff; }
+        .badge-cancelled { background-color: #dc3545; color: #fff; }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                right: -260px;
+            }
+            .sidebar.toggled {
+                right: 0;
+            }
+            .main-content {
+                margin-right: 0;
+            }
+        }
+    </style>
+</head>
+<body class="d-none">
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="login-modal">
+        <div class="login-box">
+            <h4><i class="fas fa-hotel me-2"></i>فندق قاعود</h4>
+            <p>لوحة تحكم المشرف</p>
+            <form id="login-form">
+                <div class="form-floating mb-3">
+                    <input type="password" class="form-control" id="password" placeholder="كلمة المرور" required>
+                    <label for="password">كلمة المرور</label>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">تسجيل الدخول</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <!-- Sidebar -->
+        <div id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <h3>فندق قاعود</h3>
+            </div>
+            <div class="sidebar-nav">
+                <ul class="nav flex-column">
+                    <li class="nav-item"><a class="nav-link active" href="#dashboard" data-page="dashboard"><i class="fas fa-tachometer-alt fa-fw"></i> الرئيسية</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#service-requests" data-page="service-requests"><i class="fas fa-concierge-bell fa-fw"></i> طلبات الخدمة</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#food-orders" data-page="food-orders"><i class="fas fa-utensils fa-fw"></i> طلبات الطعام</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#rooms-management" data-page="rooms-management"><i class="fas fa-door-open fa-fw"></i> إدارة الغرف</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#reports" data-page="reports"><i class="fas fa-chart-line fa-fw"></i> التقارير</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#settings" data-page="settings"><i class="fas fa-cogs fa-fw"></i> الإعدادات</a></li>
+                </ul>
+            </div>
+            <div class="sidebar-footer">
+                <button id="logout-btn-sidebar" class="btn btn-outline-light w-100"><i class="fas fa-sign-out-alt me-2"></i> تسجيل الخروج</button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main id="main-content" class="main-content">
+            <div class="topbar">
+                <button id="sidebar-toggle" class="btn btn-light"><i class="fas fa-bars"></i></button>
+                <button id="logout-btn-topbar" class="btn btn-light btn-logout"><i class="fas fa-sign-out-alt"></i></button>
+            </div>
+
+            <!-- Page Content will be loaded here -->
+            <div id="page-content"></div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal fade" id="detailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailsModalTitle">تفاصيل الطلب</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="detailsModalBody">
+                    <!-- Details will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade" id="addOrderModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">إضافة طلب طعام جديد</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-3"><input type="number" id="order-room-number" class="form-control" placeholder="رقم الغرفة *"></div>
+                        <div class="col-md-4"><input type="text" id="order-guest-name" class="form-control" placeholder="اسم النزيل"></div>
+                        <div class="col-md-5"><input type="tel" id="order-guest-phone" class="form-control" placeholder="رقم الهاتف"></div>
+                    </div>
+                    <hr/>
+                    <div class="row">
+                        <div class="col-lg-7">
+                            <input type="text" id="menu-search" class="form-control mb-3" placeholder="ابحث عن صنف...">
+                            <div id="menu-items-container" class="overflow-auto" style="height: 50vh;"></div>
+                        </div>
+                        <div class="col-lg-5">
+                            <h5><i class="fas fa-shopping-cart me-2"></i> سلة الطلبات</h5>
+                            <div id="cart-items-container" class="overflow-auto" style="height: 40vh;"></div>
+                            <hr/>
+                            <div class="d-flex justify-content-between">
+                                <h5>الإجمالي:</h5>
+                                <h5 id="cart-total">0.00 ج.م</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" id="submit-new-order-btn" class="btn btn-primary">إرسال الطلب</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script>
+        const firebaseConfig = {
+          apiKey: "AIzaSyApgrwfyrVJYsihy9tUwPfazdNYZPqWbow",
+          authDomain: "kaoud-hotel.firebaseapp.com",
+          databaseURL: "https://kaoud-hotel-default-rtdb.firebaseio.com",
+          projectId: "kaoud-hotel",
+          storageBucket: "kaoud-hotel.appspot.com",
+          messagingSenderId: "77309702077",
+          appId: "1:77309702077:web:1eee14c06204def2eb6cd4",
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const menuData = [
+            { id: "soups", name: "الشوربات", en_name: "Soups", image: "https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?q=80&w=2070", items: [ {id: "soup1", name: "شوربة لسان عصفور", en_name: "Vermicelli Soup", price: 35.00}, {id: "soup2", name: "شوربة خضار", en_name: "Vegetable Soup", price: 50.00}, {id: "soup3", name: "شوربة طماطم", en_name: "Tomato Soup", price: 55.00}, {id: "soup4", name: "شوربة كريمة بالمشروم", en_name: "Cream of Mushroom Soup", price: 105.00}, {id: "soup5", name: "شوربة كريمة بالفراخ", en_name: "Cream of Chicken Soup", price: 130.00}, {id: "soup6", name: "شوربة سى فوود", en_name: "Sea Food Soup", price: 195.00} ] },
+            { id: "appetizers", name: "المقبلات", en_name: "Appetizers", image: "https://images.unsplash.com/photo-1547592166-23ac45744acd?q=80&w=2071", items: [ {id: "appetizer1", name: "سلطة خضراء", en_name: "Green Salad", price: 30.00}, {id: "appetizer2", name: "سلطة بطاطس", en_name: "Potato Salad", price: 30.00}, {id: "appetizer3", name: "سلطة بنجر", en_name: "Beetroot Salad", price: 30.00}, {id: "appetizer4", name: "سلطة طحينة", en_name: "Tahini Salad", price: 35.00}, {id: "appetizer5", name: "سلطة بابا غنوج", en_name: "Baba Ghanoush", price: 35.00}, {id: "appetizer6", name: "سلطة بطاطس مايونيز", en_name: "Potato Mayonnaise Salad", price: 40.00}, {id: "appetizer7", name: "سلطة زبادى", en_name: "Yogurt Salad", price: 40.00}, {id: "appetizer8", name: "بوم فريت", en_name: "French Fries", price: 40.00} ] },
+            { id: "pastas", name: "العجائن والنشويات", en_name: "Pasta & Carbohydrates", image: "https://images.unsplash.com/photo-1608897013039-887f21d8c804?q=80&w=1926", items: [ {id: "pasta1", name: "مكرونة إسباجتى", en_name: "Spaghetti", price: 55.00}, {id: "pasta2", name: "مكرونة إسباجتى بولونيز", en_name: "Spaghetti Bolognese", price: 85.00}, {id: "pasta3", name: "مكرونة بالسجق", en_name: "Pasta With Sausage", price: 95.00}, {id: "pasta4", name: "مكرونة فرن باللحمة المفرومة", en_name: "Macaroni Bachamil", price: 95.00}, {id: "pasta5", name: "مكرونة تشيكن الفريدو", en_name: "Chicken Alfredo Pasta", price: 150.00}, {id: "pasta6", name: "مكرونة تشيكن نجرسكو", en_name: "Spaghetti Negresco Chicken", price: 165.00}, {id: "pasta7", name: "مكرونة بشاميل شيش طاووق", en_name: "Pasta Bechamel Shish Tawook", price: 165.00}, {id: "pasta8", name: "مكرونة جمبرى", en_name: "Shrimps Pasta", price: 220.00}, {id: "pasta9", name: "مكرونة ميكس سى فوود", en_name: "Seafood Pasta", price: 250.00} ] },
+            { id: "main-courses", name: "الأطباق الرئيسية", en_name: "Main Dishes", image: "https://images.unsplash.com/photo-1600891964092-4316c288032e?q=80&w=2070", items: [ {id: "main1", name: "سجق مشوي", en_name: "Grilled Sausage", price: 170.00}, {id: "main2", name: "كبدة مشوية", en_name: "Grilled liver", price: 170.00}, {id: "main3", name: "ورقة سجق شرقى", en_name: "Oriental Sausage Sheet", price: 190.00}, {id: "main4", name: "كفتة مشوية", en_name: "Grilled Kofta", price: 200.00}, {id: "main5", name: "فراخ مشوى", en_name: "Grilled Chicken", price: 215.00}, {id: "main6", name: "صدور فراخ مشوى", en_name: "Grilled chicken breasts", price: 230.00}, {id: "main7", name: "فراخ بانيه", en_name: "Chicken pane", price: 250.00}, {id: "main8", name: "شيش طاووق", en_name: "Shish Tawook", price: 250.00}, {id: "main9", name: "تشيكن كرسبى", en_name: "Chicken Crispy", price: 250.00}, {id: "main10", name: "فراخ ليمون صوص", en_name: "Chicken Lemon Sauce", price: 260.00}, {id: "main11", name: "إستيك مشوى", en_name: "Grilled Steak", price: 280.00}, {id: "main12", name: "فراخ صوص مشروم", en_name: "Chicken Mushroom Sauce", price: 260.00}, {id: "main13", name: "تشيكن مشروم موكا", en_name: "Chicken Mushroom Mocha", price: 270.00}, {id: "main14", name: "فراخ روول", en_name: "Chicken Roll", price: 270.00}, {id: "main15", name: "إستيك مشروم", en_name: "Mushroom Steak", price: 290.00}, {id: "main16", name: "إستيك بوافر", en_name: "Stick Poivre", price: 290.00}, {id: "main17", name: "ورقة لحمة", en_name: "Steick Papper", price: 315.00}, {id: "main18", name: "ميكس جريل", en_name: "Mix Grill", price: 400.00} ] },
+            { id: "family-meals", name: "الوجبات العائلية", en_name: "Family Meals", image: "https://images.unsplash.com/photo-1556911220-ef412ae179a9?q=80&w=1968", items: [ {id: "family1", name: "وجبة 4 أفراد (مشويات)", en_name: "Meal for 4 Persons (Grilled)", price: 1190.00}, {id: "family2", name: "وجبة 4 أفراد (ممتازة)", en_name: "Premium Meal for 4 Persons", price: 1450.00}, {id: "family3", name: "وجبة 6 أفراد (لوكس)", en_name: "Deluxe Meal for 6 Persons", price: 1900.00}, {id: "family4", name: "وجبة سى فوود 4 أفراد", en_name: "Seafood Meal for 4 Persons", price: 1280.00}, {id: "family5", name: "وجبة سى فوود 6 أفراد", en_name: "Seafood Meal for 6 Persons", price: 1650.00}, {id: "family6", name: "وجبة سمك 4 أفراد", en_name: "Fish Meal for 4 Persons", price: 980.00} ] },
+            { id: "fish-casseroles", name: "الأسماك والطواجن", en_name: "Fish & Casseroles", image: "https://images.unsplash.com/photo-1611599537845-1c7aca0091c0?q=80&w=1974", items: [ {id: "fish1", name: "طبق بساريا", en_name: "Basaria Platter", price: 50.00}, {id: "fish2", name: "طبق ملوخية بالجمبرى", en_name: "Molokhia With Shrimp Platter", price: 120.00}, {id: "fish3", name: "سمك بلطى مشوى", en_name: "Bolty Fish Grilled", price: 170.00}, {id: "fish4", name: "سمك بلطى مقلى", en_name: "Bolty Fish Fried", price: 180.00}, {id: "fish5", name: "فيليه مشوى", en_name: "Fish Fillet Grilled", price: 190.00}, {id: "fish6", name: "فيليه مقلى", en_name: "Fish Fillet Fried", price: 200.00}, {id: "fish7", name: "سمك بورى مشوى", en_name: "Bouri Fish Grilled", price: 195.00}, {id: "fish8", name: "سمك بورى سنجارى", en_name: "Bouri Fish Sangari", price: 200.00}, {id: "fish9", name: "كليمارى مقلى", en_name: "Fried Calemari", price: 295.00}, {id: "fish10", name: "جمبرى (مشوى - مقلى)", en_name: "Shrimps (Grilled-Fried)", price: 400.00}, {id: "fish11", name: "جمبرى كبير (مشوى - مقلى)", en_name: "Shrimps Jambo (Grilled-Fried)", price: 450.00}, {id: "fish12", name: "ميكس سى فوود", en_name: "Mixed Sea Food", price: 490.00}, {id: "fish13", name: "طبق ملوخية", en_name: "Molokhia Platter", price: 55.00}, {id: "fish14", name: "طاجن مسقعة باللحمة", en_name: "Miussaka Casserole With Meat", price: 140.00}, {id: "fish15", name: "طاجن تورللى باللحمة", en_name: "Meat Turlly Casserole With Meat", price: 180.00}, {id: "fish16", name: "طاجن بسلة باللحمة", en_name: "Pea Casserole With Meat", price: 180.00}, {id: "fish17", name: "طاجن بامية باللحمة", en_name: "Okra Casserole With Meat", price: 190.00}, {id: "fish18", name: "طاجن كاليمارى", en_name: "Calamari Tajine", price: 300.00}, {id: "fish19", name: "طاجن جمبرى", en_name: "Shrimp Tajine", price: 360.00}, {id: "fish20", name: "طاجن ميكس سى فوود", en_name: "Mix Seafood Tajine", price: 380.00} ] },
+            { id: "sandwiches-pizza", name: "الساندويتشات والبيتزا", en_name: "Sandwiches & Pizza", image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=1998", items: [ {id: "sandwich1", name: "كبده اسكندرانى", en_name: "Alexandrian liver", price: 60.00}, {id: "sandwich2", name: "سجق", en_name: "Sausage", price: 60.00}, {id: "sandwich3", name: "هامبورجر", en_name: "Hamburger", price: 80.00}, {id: "sandwich4", name: "شيش طاووق", en_name: "Shish Tawook", price: 95.00}, {id: "sandwich5", name: "تشيكن فاهيتا", en_name: "Chicken fahita", price: 100.00}, {id: "sandwich6", name: "كفتة مشوية", en_name: "Grilled kofta", price: 95.00}, {id: "sandwich7", name: "تشيكن شاورما", en_name: "Chicken Shawarma", price: 100.00}, {id: "sandwich8", name: "فراخ بانيه", en_name: "Chicken pane", price: 100.00}, {id: "sandwich9", name: "تشيكن كرسبى", en_name: "Chicken crispy", price: 120.00}, {id: "sandwich10", name: "كليمارى", en_name: "Calamari", price: 155.00}, {id: "sandwich11", name: "جمبرى", en_name: "Shrimp", price: 170.00}, {id: "pizza1", name: "بيتزا مارجريتا", en_name: "Margarita", price: 140.00}, {id: "pizza2", name: "بيتزا خضروات", en_name: "Vegetables", price: 150.00}, {id: "pizza3", name: "بيتزا ميكس جبن", en_name: "Mix Cheese", price: 170.00}, {id: "pizza4", name: "بيتزا سجق", en_name: "Sausage", price: 200.00}, {id: "pizza5", name: "بيتزا ميكس لحوم", en_name: "Mix Meat", price: 220.00}, {id: "pizza6", name: "بيتزا فراخ باربيكيو", en_name: "BBQ Chicken", price: 230.00}, {id: "pizza7", name: "بيتزا بسطرمة", en_name: "Pastirma", price: 240.00}, {id: "pizza8", name: "بيتزا جمبرى", en_name: "Shrimp", price: 250.00}, {id: "pizza9", name: "بيتزا سى فوود", en_name: "Seafood", price: 300.00} ] },
+            { id: "desserts", name: "الحلويات", en_name: "Desserts", image: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?q=80&w=1974", items: [ {id: "dessert1", name: "ارز باللبن سادة", en_name: "Plain Rice Milk", price: 35.00}, {id: "dessert2", name: "ارز باللبن ايس كريم", en_name: "Rice pudding ice cream", price: 50.00}, {id: "dessert3", name: "ارز باللبن بالمكسرات", en_name: "Rice with milk and nuts", price: 60.00}, {id: "dessert4", name: "ارز باللبن عسل ومكسرات", en_name: "Rice with milk, honey, and nuts", price: 65.00}, {id: "dessert5", name: "ارز باللبن ايس كريم ومكسرات", en_name: "Rice pudding ice cream with nuts", price: 65.00}, {id: "dessert6", name: "أم على", en_name: "Um Ali", price: 55.00}, {id: "dessert7", name: "أم على مكسرات", en_name: "Um Ali, nuts", price: 70.00}, {id: "dessert8", name: "أم على نوتيلا", en_name: "Um Ali Nutella", price: 75.00}, {id: "dessert9", name: "فروت سلاط", en_name: "Fruit Salad", price: 85.00}, {id: "dessert10", name: "فروت سلاط آيس كريم", en_name: "Fruit Salad Ice Cream", price: 95.00}, {id: "dessert11", name: "طبق فاكهة", en_name: "Fruit plate", price: 120.00}, {id: "dessert12", name: "وافل نوتيلا", en_name: "Waffle Nutella", price: 63.00}, {id: "dessert13", name: "وافل وايت شيكولاتة", en_name: "Waffle white chocolate", price: 68.00}, {id: "dessert14", name: "وافل كاراميل", en_name: "Waffle Caramel", price: 80.00}, {id: "dessert15", name: "وافل لوتس", en_name: "Waffle Lotus", price: 85.00}, {id: "dessert16", name: "وافل فورسيزون", en_name: "Waffle for season", price: 115.00} ] },
+            { id: "hot-drinks", name: "المشروبات الساخنة", en_name: "Hot Drinks", image: "https://images.unsplash.com/photo-1497534446932-c925b458314e?q=80&w=2066", items: [ {id: "hotdrink1", name: "أعشاب (بابونج - ينسون - كركديه)", en_name: "Herbs (Chamoomile - Anise - Hibiscus)", price: 35.00}, {id: "hotdrink2", name: "نعناع - جنزبيل - قرفة", en_name: "Mint - Ginger - Cinnamon", price: 35.00}, {id: "hotdrink3", name: "فيتامين سى (عسل - نعناع فريش)", en_name: "Vitamin C (Honey - Fresh Mint)", price: 45.00}, {id: "hotdrink4", name: "ليمون فريش - باكت ينسون - باكت نعناع", en_name: "Fresh Lemon - Anise Packet - Mint Packet", price: 45.00}, {id: "hotdrink5", name: "شاى ليبتون", en_name: "Lipton Tea", price: 40.00}, {id: "hotdrink6", name: "شاى ليبتون نعناع", en_name: "Lipton Tea With Mint", price: 45.00}, {id: "hotdrink7", name: "شاى زردة", en_name: "Zarda Tea", price: 45.00}, {id: "hotdrink8", name: "شاى ليبتون بالحليب", en_name: "Tea With Milk", price: 47.00}, {id: "hotdrink9", name: "قهوة تركى سنجل", en_name: "Turkish Coffee single", price: 45.00}, {id: "hotdrink10", name: "قهوة تركى دبل", en_name: "Turkish Coffee Double", price: 65.00}, {id: "hotdrink11", name: "قهوة تركى محوج", en_name: "Mixed Turkish Coffee Single", price: 50.00}, {id: "hotdrink12", name: "قهوة تركى محوج دبل", en_name: "Mixed Turkish Coffee Double", price: 70.00} ] }
+        ];
+
+        $(document).ready(function () {
+            
+            // --- AUTHENTICATION ---
+            function checkAuth() {
+                if (sessionStorage.getItem('admin_logged_in') !== 'true') {
+                    $('#login-modal').show();
+                    $('body').removeClass('d-none');
+                } else {
+                    $('#login-modal').hide();
+                    $('body').removeClass('d-none');
+                    loadPage('dashboard');
+                }
+            }
+
+            $('#login-form').on('submit', function(e) {
+                e.preventDefault();
+                const password = $('#password').val();
+                if (password === 'admin123') {
+                    sessionStorage.setItem('admin_logged_in', 'true');
+                    checkAuth();
+                    Toast.fire({ icon: 'success', title: 'تم تسجيل الدخول بنجاح' });
+                } else {
+                    Toast.fire({ icon: 'error', title: 'كلمة المرور غير صحيحة' });
+                }
+            });
+
+            function logout() {
+                sessionStorage.removeItem('admin_logged_in');
+                checkAuth();
+            }
+
+            $('#logout-btn-sidebar, #logout-btn-topbar').on('click', logout);
+
+
+            // --- UI & NAVIGATION ---
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer);
+                    toast.addEventListener('mouseleave', Swal.resumeTimer);
+                }
+            });
+
+            $('#sidebar-toggle').on('click', function () {
+                $('#sidebar').toggleClass('toggled');
+                // Could add logic to adjust main content margin if needed
+            });
+            
+             $('.sidebar-nav .nav-link').on('click', function(e) {
+                e.preventDefault();
+                const page = $(this).data('page');
+                
+                $('.sidebar-nav .nav-link').removeClass('active');
+                $(this).addClass('active');
+                
+                window.location.hash = page;
+            });
+
+            $(window).on('hashchange', function() {
+                const page = window.location.hash.replace('#', '') || 'dashboard';
+                $('.sidebar-nav .nav-link').removeClass('active');
+                $(`.sidebar-nav .nav-link[data-page="${page}"]`).addClass('active');
+                loadPage(page);
+            }).trigger('hashchange');
+
+
+            // --- PAGE LOADING ---
+            function loadPage(page) {
+                console.log(`Loading page: ${page}`);
+                 $('#page-content').html('<div class="d-flex justify-content-center mt-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+                 
+                switch (page) {
+                    case 'dashboard':
+                        loadDashboard();
+                        break;
+                    case 'service-requests':
+                        loadServiceRequests();
+                        break;
+                    case 'food-orders':
+                        loadFoodOrders();
+                        break;
+                    case 'rooms-management':
+                         loadRoomsManagement();
+                        break;
+                    case 'reports':
+                        loadReports();
+                        break;
+                    case 'settings':
+                        loadSettings();
+                        break;
+                    default:
+                         $('#page-content').html('<h2>Page Not Found</h2>');
+                }
+            }
+            
+            function formatTimestamp(ts) {
+                if (!ts) return '-';
+                return new Date(ts).toLocaleString('ar-EG');
+            }
+            
+            function getStatusBadge(status) {
+                const badgeMap = {
+                    pending: '<span class="badge rounded-pill badge-status badge-pending">معلق</span>',
+                    processing: '<span class="badge rounded-pill badge-status badge-processing">قيد المعالجة</span>',
+                    completed: '<span class="badge rounded-pill badge-status badge-completed">مكتمل</span>',
+                    cancelled: '<span class="badge rounded-pill badge-status badge-cancelled">ملغي</span>',
+                };
+                return badgeMap[status] || status;
+            }
+
+            // --- DASHBOARD ---
+            function loadDashboard() {
+                 const html = `
+                    <h2><i class="fas fa-tachometer-alt me-2"></i>الرئيسية</h2>
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-3"><div class="stat-card"><div class="icon"><i class="fas fa-concierge-bell"></i></div><h5 class="mb-2">طلبات الخدمة</h5><div id="total-service-requests" class="stat-value">0</div></div></div>
+                        <div class="col-md-3"><div class="stat-card"><div class="icon"><i class="fas fa-utensils"></i></div><h5 class="mb-2">طلبات الطعام</h5><div id="total-food-orders" class="stat-value">0</div></div></div>
+                        <div class="col-md-3"><div class="stat-card"><div class="icon"><i class="fas fa-door-open"></i></div><h5 class="mb-2">الغرف النشطة</h5><div id="active-rooms" class="stat-value">0</div></div></div>
+                        <div class="col-md-3"><div class="stat-card"><div class="icon"><i class="fas fa-star-half-alt"></i></div><h5 class="mb-2">متوسط التقييم</h5><div id="average-rating" class="stat-value">0.0</div></div></div>
+                    </div>
+                    <div class="row g-4">
+                        <div class="col-lg-6">
+                            <div class="table-responsive">
+                                <h5>آخر 5 طلبات خدمة</h5>
+                                <table class="table align-middle">
+                                    <thead><tr><th>الغرفة</th><th>الطلب</th><th>الحالة</th></tr></thead>
+                                    <tbody id="latest-service-requests"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                             <div class="table-responsive">
+                                <h5>آخر 5 طلبات طعام</h5>
+                                <table class="table align-middle">
+                                    <thead><tr><th>الغرفة</th><th>الإجمالي</th><th>الحالة</th></tr></thead>
+                                    <tbody id="latest-food-orders"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="mt-4 table-responsive">
+                        <h5>الطلبات خلال آخر 7 أيام</h5>
+                        <canvas id="requestsChart"></canvas>
+                    </div>
+                `;
+                $('#page-content').html(html);
+
+                // Fetch and populate data
+                 db.ref('rooms').on('value', snapshot => {
+                    const roomsData = snapshot.val() || {};
+                    let serviceCount = 0;
+                    let foodCount = 0;
+                    let totalRating = 0;
+                    let ratingCount = 0;
+                    let latestServices = [];
+                    let latestFoods = [];
+                    
+                    const roomIds = Object.keys(roomsData);
+                    $('#active-rooms').text(roomIds.length);
+
+                    roomIds.forEach(roomId => {
+                        const room = roomsData[roomId];
+                        if (room.comments) {
+                            Object.values(room.comments).forEach(comment => {
+                                serviceCount++;
+                                if (comment.rating) {
+                                    totalRating += comment.rating;
+                                    ratingCount++;
+                                }
+                                latestServices.push({ ...comment, roomId: roomId.replace('room_', '') });
+                            });
+                        }
+                        if (room.orders) {
+                            Object.values(room.orders).forEach(order => {
+                                foodCount++;
+                                latestFoods.push({ ...order, roomId: roomId.replace('room_', '') });
+                            });
+                        }
+                    });
+
+                    $('#total-service-requests').text(serviceCount);
+                    $('#total-food-orders').text(foodCount);
+                    $('#average-rating').text(ratingCount > 0 ? (totalRating / ratingCount).toFixed(1) : 'N/A');
+
+                    latestServices.sort((a,b) => b.timestamp - a.timestamp).slice(0, 5).forEach(req => {
+                        $('#latest-service-requests').append(`<tr><td>${req.roomId}</td><td>${req.text.substring(0,20)}...</td><td>${getStatusBadge(req.status)}</td></tr>`);
+                    });
+
+                     latestFoods.sort((a,b) => b.timestamp - a.timestamp).slice(0, 5).forEach(order => {
+                        $('#latest-food-orders').append(`<tr><td>${order.roomId}</td><td>${order.total.toFixed(2)} ج.م</td><td>${getStatusBadge(order.status)}</td></tr>`);
+                    });
+                    
+                    renderRequestsChart(latestServices, latestFoods);
+                });
+            }
+            
+            let requestsChartInstance = null;
+            function renderRequestsChart(services, foods) {
+                if (requestsChartInstance) requestsChartInstance.destroy();
+                
+                const labels = [];
+                const serviceData = [];
+                const foodData = [];
+
+                for (let i = 6; i >= 0; i--) {
+                    const d = new Date();
+                    d.setDate(d.getDate() - i);
+                    labels.push(d.toLocaleDateString('ar-EG', { weekday: 'short', day: 'numeric' }));
+                    
+                    const dayStart = new Date(d.setHours(0,0,0,0)).getTime();
+                    const dayEnd = new Date(d.setHours(23,59,59,999)).getTime();
+
+                    const dailyServices = services.filter(s => s.timestamp >= dayStart && s.timestamp <= dayEnd).length;
+                    const dailyFoods = foods.filter(f => f.timestamp >= dayStart && f.timestamp <= dayEnd).length;
+                    
+                    serviceData.push(dailyServices);
+                    foodData.push(dailyFoods);
+                }
+
+                const ctx = document.getElementById('requestsChart').getContext('2d');
+                requestsChartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'طلبات الخدمة',
+                                data: serviceData,
+                                borderColor: 'rgba(93, 64, 55, 1)',
+                                backgroundColor: 'rgba(93, 64, 55, 0.2)',
+                                fill: true,
+                            },
+                             {
+                                label: 'طلبات الطعام',
+                                data: foodData,
+                                borderColor: 'rgba(212, 175, 55, 1)',
+                                backgroundColor: 'rgba(212, 175, 55, 0.2)',
+                                fill: true,
+                            }
+                        ]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+
+
+            // --- SERVICE REQUESTS ---
+            function loadServiceRequests() {
+                const html = `
+                    <h2><i class="fas fa-concierge-bell me-2"></i>طلبات الخدمة</h2>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr><th>الغرفة</th><th>النزيل</th><th>الطلب</th><th>التقييم</th><th>التاريخ</th><th>الحالة</th><th>الإجراءات</th></tr>
+                            </thead>
+                            <tbody id="service-requests-table">
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                $('#page-content').html(html);
+
+                db.ref('rooms').on('value', snapshot => {
+                    const roomsData = snapshot.val() || {};
+                     $('#service-requests-table').empty();
+                    Object.keys(roomsData).forEach(roomId => {
+                        const room = roomsData[roomId];
+                        if (room.comments) {
+                            Object.keys(room.comments).forEach(commentId => {
+                                const comment = room.comments[commentId];
+                                const row = `
+                                    <tr data-room-id="${roomId}" data-comment-id="${commentId}">
+                                        <td>${roomId.replace('room_', '')}</td>
+                                        <td>${comment.guestName || '-'}</td>
+                                        <td>${comment.text.substring(0, 40)}...</td>
+                                        <td>${comment.rating ? `${comment.rating} <i class="fas fa-star text-warning"></i>` : '-'}</td>
+                                        <td>${formatTimestamp(comment.timestamp)}</td>
+                                        <td class="status-cell">${getStatusBadge(comment.status || 'pending')}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary view-details-btn"><i class="fas fa-eye"></i></button>
+                                            <div class="btn-group">
+                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                    تحديث
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item update-status-btn" href="#" data-status="pending">معلق</a></li>
+                                                    <li><a class="dropdown-item update-status-btn" href="#" data-status="processing">قيد المعالجة</a></li>
+                                                    <li><a class="dropdown-item update-status-btn" href="#" data-status="completed">مكتمل</a></li>
+                                                     <li><a class="dropdown-item update-status-btn" href="#" data-status="cancelled">ملغي</a></li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `;
+                                 $('#service-requests-table').append(row);
+                            });
+                        }
+                    });
+                });
+            }
+
+            // --- FOOD ORDERS ---
+            function loadFoodOrders() {
+                 const html = `
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                         <h2><i class="fas fa-utensils me-2"></i>طلبات الطعام</h2>
+                         <button id="add-new-order-btn" class="btn btn-primary"><i class="fas fa-plus me-2"></i>إضافة طلب جديد</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr><th>الغرفة</th><th>النزيل</th><th>الإجمالي</th><th>التاريخ</th><th>الحالة</th><th>الإجراءات</th></tr>
+                            </thead>
+                            <tbody id="food-orders-table">
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                $('#page-content').html(html);
+
+                db.ref('rooms').on('value', snapshot => {
+                    const roomsData = snapshot.val() || {};
+                    $('#food-orders-table').empty();
+                    Object.keys(roomsData).forEach(roomId => {
+                        const room = roomsData[roomId];
+                        if (room.orders) {
+                            Object.keys(room.orders).forEach(orderId => {
+                                const order = room.orders[orderId];
+                                const row = `
+                                    <tr data-room-id="${roomId}" data-order-id="${orderId}">
+                                        <td>${roomId.replace('room_', '')}</td>
+                                        <td>${order.guestName || '-'}</td>
+                                        <td>${order.total.toFixed(2)} ج.م</td>
+                                        <td>${formatTimestamp(order.timestamp)}</td>
+                                        <td class="status-cell">${getStatusBadge(order.status || 'pending')}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary view-order-details-btn"><i class="fas fa-eye"></i></button>
+                                            <div class="btn-group">
+                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                    تحديث
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item update-order-status-btn" href="#" data-status="pending">معلق</a></li>
+                                                    <li><a class="dropdown-item update-order-status-btn" href="#" data-status="processing">قيد المعالجة</a></li>
+                                                    <li><a class="dropdown-item update-order-status-btn" href="#" data-status="completed">مكتمل</a></li>
+                                                     <li><a class="dropdown-item update-order-status-btn" href="#" data-status="cancelled">ملغي</a></li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `;
+                                 $('#food-orders-table').append(row);
+                            });
+                        }
+                    });
+                });
+            }
+            
+            // --- ROOMS MANAGEMENT ---
+            function loadRoomsManagement() {
+                 const html = `
+                    <h2><i class="fas fa-door-open me-2"></i>إدارة الغرف</h2>
+                    <div id="rooms-container" class="row g-4"></div>
+                `;
+                $('#page-content').html(html);
+
+                db.ref('rooms').on('value', snapshot => {
+                    const roomsData = snapshot.val() || {};
+                    $('#rooms-container').empty();
+                     if (Object.keys(roomsData).length === 0) {
+                        $('#rooms-container').html('<p class="text-muted">لا توجد غرف نشطة حاليًا.</p>');
+                        return;
+                    }
+                    Object.keys(roomsData).forEach(roomId => {
+                        const room = roomsData[roomId];
+                        const roomNum = roomId.replace('room_', '');
+                        const serviceCount = room.comments ? Object.keys(room.comments).length : 0;
+                        const orderCount = room.orders ? Object.keys(room.orders).length : 0;
+                        const allTimestamps = [
+                           ...(room.comments ? Object.values(room.comments).map(c => c.timestamp) : []),
+                           ...(room.orders ? Object.values(room.orders).map(o => o.timestamp) : [])
+                        ];
+                        const lastActivity = allTimestamps.length > 0 ? formatTimestamp(Math.max(...allTimestamps)) : 'لا يوجد';
+                        
+                        const card = `
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">غرفة ${roomNum}</h5>
+                                    <p class="card-text">
+                                        <i class="fas fa-concierge-bell text-muted"></i> طلبات خدمة: ${serviceCount}<br>
+                                        <i class="fas fa-utensils text-muted"></i> طلبات طعام: ${orderCount}<br>
+                                        <i class="fas fa-history text-muted"></i> آخر نشاط: ${lastActivity}
+                                    </p>
+                                </div>
+                                <div class="card-footer bg-light d-flex justify-content-end gap-2">
+                                     <button class="btn btn-sm btn-outline-danger schedule-removal-btn" data-room-id="${roomId}">تسجيل خروج</button>
+                                </div>
+                            </div>
+                        </div>`;
+                         $('#rooms-container').append(card);
+                    });
+                });
+            }
+            
+            // --- REPORTS ---
+            function loadReports() {
+                 const html = `
+                    <h2><i class="fas fa-chart-line me-2"></i>التقارير</h2>
+                    <div class="row g-4">
+                        <div class="col-md-6"><div class="table-responsive"><h5>طلبات الخدمة حسب الحالة</h5><canvas id="serviceStatusChart"></canvas></div></div>
+                        <div class="col-md-6"><div class="table-responsive"><h5>طلبات الطعام حسب الحالة</h5><canvas id="foodStatusChart"></canvas></div></div>
+                        <div class="col-md-6"><div class="table-responsive"><h5>توزيع تقييمات الخدمة</h5><canvas id="ratingsChart"></canvas></div></div>
+                        <div class="col-md-6"><div class="table-responsive"><h5>أكثر 10 أصناف طلبًا</h5><canvas id="topItemsChart"></canvas></div></div>
+                    </div>
+                 `;
+                $('#page-content').html(html);
+                
+                db.ref('rooms').once('value', snapshot => {
+                    const roomsData = snapshot.val() || {};
+                    let serviceStatus = { pending: 0, processing: 0, completed: 0, cancelled: 0 };
+                    let foodStatus = { pending: 0, processing: 0, completed: 0, cancelled: 0 };
+                    let ratings = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+                    let itemCounts = {};
+
+                    Object.values(roomsData).forEach(room => {
+                        if (room.comments) {
+                            Object.values(room.comments).forEach(c => {
+                                serviceStatus[c.status || 'pending']++;
+                                if (c.rating) ratings[c.rating]++;
+                            });
+                        }
+                        if (room.orders) {
+                            Object.values(room.orders).forEach(o => {
+                                foodStatus[o.status || 'pending']++;
+                                o.items.forEach(item => {
+                                    itemCounts[item.name_ar] = (itemCounts[item.name_ar] || 0) + item.quantity;
+                                });
+                            });
+                        }
+                    });
+
+                    renderChart('serviceStatusChart', 'bar', ['معلق', 'قيد المعالجة', 'مكتمل', 'ملغي'], Object.values(serviceStatus), 'طلبات الخدمة');
+                    renderChart('foodStatusChart', 'doughnut', ['معلق', 'قيد المعالجة', 'مكتمل', 'ملغي'], Object.values(foodStatus), 'طلبات الطعام');
+                    renderChart('ratingsChart', 'bar', ['★1', '★2', '★3', '★4', '★5'], Object.values(ratings), 'التقييمات');
+                    
+                    const sortedItems = Object.entries(itemCounts).sort(([,a],[,b]) => b-a).slice(0, 10);
+                    renderChart('topItemsChart', 'bar', sortedItems.map(i => i[0]), sortedItems.map(i => i[1]), 'أكثر الأصناف طلبًا', { indexAxis: 'y' });
+                });
+            }
+
+            function renderChart(canvasId, type, labels, data, label, extraOptions = {}) {
+                new Chart(document.getElementById(canvasId).getContext('2d'), {
+                    type: type,
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: label,
+                            data: data,
+                            backgroundColor: [
+                                'rgba(212, 175, 55, 0.7)', 'rgba(93, 64, 55, 0.7)', 'rgba(33, 37, 41, 0.7)',
+                                'rgba(25, 135, 84, 0.7)', 'rgba(220, 53, 69, 0.7)'
+                            ],
+                            borderColor: '#fff',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: { ...extraOptions, responsive: true }
+                });
+            }
+            
+            // --- SETTINGS ---
+            function loadSettings() {
+                const settings = JSON.parse(localStorage.getItem('admin_settings') || '{}');
+                const html = `
+                    <h2><i class="fas fa-cogs me-2"></i>الإعدادات</h2>
+                    <div class="table-responsive">
+                        <form id="settings-form">
+                            <div class="mb-3">
+                                <label for="new-password" class="form-label">تغيير كلمة المرور</label>
+                                <input type="password" id="new-password" class="form-control" placeholder="كلمة المرور الجديدة">
+                                <input type="password" id="confirm-password" class="form-control mt-2" placeholder="تأكيد كلمة المرور">
+                            </div>
+                            <hr>
+                            <h5>إعدادات النظام</h5>
+                            <div class="mb-3">
+                                <label for="delete-days" class="form-label">الحذف التلقائي لبيانات الغرف بعد (أيام)</label>
+                                <input type="number" id="delete-days" class="form-control" value="${settings.deleteDays || 7}">
+                            </div>
+                             <div class="mb-3">
+                                <label for="notification-email" class="form-label">البريد الإلكتروني للإشعارات</label>
+                                <input type="email" id="notification-email" class="form-control" value="${settings.notificationEmail || ''}">
+                            </div>
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" role="switch" id="auto-reply-switch" ${settings.autoReply ? 'checked' : ''}>
+                                <label class="form-check-label" for="auto-reply-switch">تفعيل الرد التلقائي على طلبات الخدمة</label>
+                            </div>
+                            <button type="submit" class="btn btn-primary">حفظ الإعدادات</button>
+                        </form>
+                    </div>
+                `;
+                 $('#page-content').html(html);
+            }
+            
+            
+            // --- EVENT HANDLERS ---
+            
+            // Details Modals
+            $('#page-content').on('click', '.view-details-btn', function() {
+                const roomId = $(this).closest('tr').data('roomId');
+                const commentId = $(this).closest('tr').data('commentId');
+                db.ref(`rooms/${roomId}`).once('value', snapshot => {
+                    const roomData = snapshot.val();
+                    const comment = roomData.comments[commentId];
+                    const replies = roomData.replies || {};
+                    let repliesHtml = '<ul class="list-group">';
+                    Object.values(replies).forEach(r => {
+                       repliesHtml += `<li class="list-group-item">${r.text}<br><small class="text-muted">${formatTimestamp(r.timestamp)}</small></li>`;
+                    });
+                    repliesHtml += '</ul>';
+
+                    const modalBody = `
+                        <p><strong>الغرفة:</strong> ${roomId.replace('room_', '')}</p>
+                        <p><strong>الطلب:</strong> ${comment.text}</p>
+                        <p><strong>التقييم:</strong> ${comment.rating || 'لم يتم التقييم'}</p>
+                        <hr>
+                        <h6>الردود السابقة</h6>
+                        ${repliesHtml}
+                        <hr>
+                        <h6>إضافة رد جديد</h6>
+                        <textarea id="reply-text" class="form-control" rows="3"></textarea>
+                        <button id="submit-reply-btn" class="btn btn-primary mt-2" data-room-id="${roomId}">إرسال الرد</button>
+                    `;
+                    $('#detailsModalTitle').text('تفاصيل طلب الخدمة');
+                    $('#detailsModalBody').html(modalBody);
+                    new bootstrap.Modal('#detailsModal').show();
+                });
+            });
+            
+             $('#page-content').on('click', '.view-order-details-btn', function() {
+                const roomId = $(this).closest('tr').data('roomId');
+                const orderId = $(this).closest('tr').data('orderId');
+                db.ref(`rooms/${roomId}/orders/${orderId}`).once('value', snapshot => {
+                    const order = snapshot.val();
+                    let itemsHtml = '<ul class="list-group">';
+                    order.items.forEach(item => {
+                        itemsHtml += `<li class="list-group-item d-flex justify-content-between align-items-center">
+                            ${item.name_ar} (x${item.quantity})
+                            <span class="badge bg-primary rounded-pill">${(item.price * item.quantity).toFixed(2)} ج.م</span>
+                        </li>`;
+                    });
+                    itemsHtml += '</ul>';
+                     const modalBody = `
+                        <p><strong>الغرفة:</strong> ${roomId.replace('room_', '')}</p>
+                        <p><strong>النزيل:</strong> ${order.guestName || '-'}</p>
+                        <hr>
+                        <h6>الأصناف المطلوبة</h6>
+                        ${itemsHtml}
+                        <hr>
+                        <h5 class="text-end">الإجمالي: ${order.total.toFixed(2)} ج.م</h5>
+                    `;
+                    $('#detailsModalTitle').text('تفاصيل طلب الطعام');
+                    $('#detailsModalBody').html(modalBody);
+                    new bootstrap.Modal('#detailsModal').show();
+                });
+            });
+
+            // Status Updates
+             $('#page-content').on('click', '.update-status-btn', function(e) {
+                e.preventDefault();
+                const roomId = $(this).closest('tr').data('roomId');
+                const commentId = $(this).closest('tr').data('commentId');
+                const status = $(this).data('status');
+                db.ref(`rooms/${roomId}/comments/${commentId}/status`).set(status)
+                  .then(() => Toast.fire({ icon: 'success', title: 'تم تحديث الحالة' }));
+            });
+            
+             $('#page-content').on('click', '.update-order-status-btn', function(e) {
+                e.preventDefault();
+                const roomId = $(this).closest('tr').data('roomId');
+                const orderId = $(this).closest('tr').data('orderId');
+                const status = $(this).data('status');
+                db.ref(`rooms/${roomId}/orders/${orderId}/status`).set(status)
+                 .then(() => Toast.fire({ icon: 'success', title: 'تم تحديث الحالة' }));
+            });
+            
+            // Add Reply
+            $('#detailsModal').on('click', '#submit-reply-btn', function() {
+                 const roomId = $(this).data('roomId');
+                 const text = $('#reply-text').val();
+                 if (text.trim()) {
+                     db.ref(`rooms/${roomId}/replies`).push({
+                         text: text,
+                         timestamp: firebase.database.ServerValue.TIMESTAMP
+                     }).then(() => {
+                         Toast.fire({ icon: 'success', title: 'تم إرسال الرد' });
+                         bootstrap.Modal.getInstance('#detailsModal').hide();
+                     });
+                 }
+            });
+            
+            // New Food Order Modal
+            $('#page-content').on('click', '#add-new-order-btn', function() {
+                let menuHtml = '';
+                menuData.forEach(category => {
+                    menuHtml += `<h5>${category.name}</h5><ul class="list-group mb-3">`;
+                    category.items.forEach(item => {
+                         menuHtml += `
+                         <li class="list-group-item d-flex justify-content-between align-items-center menu-item-searchable" data-item-name="${item.name}">
+                            <div>${item.name}<br><small class="text-muted">${item.price.toFixed(2)} ج.م</small></div>
+                            <button class="btn btn-sm btn-outline-primary add-to-cart-btn" data-item-id='${item.id}' data-item-name='${item.name}' data-item-en-name='${item.en_name}' data-item-price='${item.price}'>
+                                <i class="fas fa-plus"></i>
+                            </button>
+                         </li>`;
+                    });
+                    menuHtml += '</ul>';
+                });
+                $('#menu-items-container').html(menuHtml);
+                $('#cart-items-container').empty();
+                $('#cart-total').text('0.00 ج.م');
+                 new bootstrap.Modal('#addOrderModal').show();
+            });
+            
+            // Cart Logic
+            let cart = {};
+            function updateCartView() {
+                $('#cart-items-container').empty();
+                let total = 0;
+                 Object.values(cart).forEach(item => {
+                     const itemHtml = `
+                     <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>${item.name_ar}</span>
+                        <div>
+                            <button class="btn btn-sm btn-outline-secondary cart-quantity-btn" data-item-id="${item.id}" data-change="-1">-</button>
+                            <span class="mx-2">${item.quantity}</span>
+                            <button class="btn btn-sm btn-outline-secondary cart-quantity-btn" data-item-id="${item.id}" data-change="1">+</button>
+                        </div>
+                     </div>
+                     `;
+                      $('#cart-items-container').append(itemHtml);
+                     total += item.price * item.quantity;
+                 });
+                 $('#cart-total').text(`${total.toFixed(2)} ج.م`);
+            }
+            $('#addOrderModal').on('click', '.add-to-cart-btn', function() {
+                const item = $(this).data();
+                if (cart[item.itemId]) {
+                    cart[item.itemId].quantity++;
+                } else {
+                    cart[item.itemId] = { id: item.itemId, name_ar: item.itemName, name_en: item.itemEnName, price: item.itemPrice, quantity: 1 };
+                }
+                updateCartView();
+            });
+            $('#addOrderModal').on('click', '.cart-quantity-btn', function() {
+                 const itemId = $(this).data('itemId');
+                 const change = $(this).data('change');
+                 if (cart[itemId]) {
+                     cart[itemId].quantity += change;
+                     if (cart[itemId].quantity <= 0) {
+                         delete cart[itemId];
+                     }
+                 }
+                 updateCartView();
+            });
+            $('#addOrderModal').on('click', '#submit-new-order-btn', function() {
+                const roomNumber = $('#order-room-number').val();
+                 if (!roomNumber) {
+                     Toast.fire({ icon: 'error', title: 'الرجاء إدخال رقم الغرفة' });
+                     return;
+                 }
+                  if (Object.keys(cart).length === 0) {
+                     Toast.fire({ icon: 'error', title: 'سلة الطلبات فارغة' });
+                     return;
+                 }
+                 
+                 const orderData = {
+                     guestName: $('#order-guest-name').val() || '',
+                     guestPhone: $('#order-guest-phone').val() || '',
+                     items: Object.values(cart),
+                     total: Object.values(cart).reduce((sum, item) => sum + item.price * item.quantity, 0),
+                     timestamp: firebase.database.ServerValue.TIMESTAMP,
+                     status: 'pending'
+                 };
+                 db.ref(`rooms/room_${roomNumber}/orders`).push(orderData).then(() => {
+                     Toast.fire({ icon: 'success', title: 'تم إرسال الطلب بنجاح' });
+                     bootstrap.Modal.getInstance('#addOrderModal').hide();
+                     cart = {}; // Reset cart
+                 });
+            });
+            $('#addOrderModal').on('keyup', '#menu-search', function() {
+                 const query = $(this).val().toLowerCase();
+                 $('.menu-item-searchable').each(function() {
+                    $(this).toggle($(this).data('itemName').toLowerCase().includes(query));
+                 });
+            });
+            
+            // Room Checkout (Schedule Removal)
+            $('#page-content').on('click', '.schedule-removal-btn', function() {
+                const roomId = $(this).data('roomId');
+                const roomNum = roomId.replace('room_', '');
+                Swal.fire({
+                    title: `تسجيل خروج غرفة ${roomNum}`,
+                    text: 'أدخل عدد الأيام لحذف بيانات هذه الغرفة تلقائيًا.',
+                    input: 'number',
+                    inputValue: 7,
+                    showCancelButton: true,
+                    confirmButtonText: 'جدولة الحذف',
+                    cancelButtonText: 'إلغاء'
+                }).then((result) => {
+                    if (result.isConfirmed && result.value) {
+                        const days = parseInt(result.value);
+                        const removalDate = new Date();
+                        removalDate.setDate(removalDate.getDate() + days);
+                        
+                        db.ref(`scheduled_removals/room_${roomNum}`).set({
+                            removalDate: removalDate.getTime(),
+                            roomNumber: roomNum
+                        }).then(() => {
+                             db.ref(roomId).remove().then(() => {
+                                Toast.fire({ icon: 'success', title: `تم تسجيل خروج الغرفة ${roomNum}. سيتم حذف البيانات بعد ${days} أيام.` });
+                             });
+                        });
+                    }
+                });
+            });
+            
+            // Save Settings
+             $('#page-content').on('submit', '#settings-form', function(e) {
+                e.preventDefault();
+                const newPassword = $('#new-password').val();
+                const confirmPassword = $('#confirm-password').val();
+
+                if (newPassword && newPassword !== confirmPassword) {
+                    Toast.fire({ icon: 'error', title: 'كلمتا المرور غير متطابقتين!' });
+                    return;
+                }
+                
+                // Note: Password change logic is illustrative. Secure implementation would require backend.
+                if (newPassword) {
+                     console.log("Password would be changed to:", newPassword);
+                     Toast.fire({ icon: 'info', title: 'ميزة تغيير كلمة المرور للعرض فقط' });
+                }
+
+                const settings = {
+                    deleteDays: $('#delete-days').val(),
+                    notificationEmail: $('#notification-email').val(),
+                    autoReply: $('#auto-reply-switch').is(':checked'),
+                };
+                
+                localStorage.setItem('admin_settings', JSON.stringify(settings));
+                Toast.fire({ icon: 'success', title: 'تم حفظ الإعدادات' });
+            });
+
+
+            // Initial check
+            checkAuth();
+        });
+    </script>
+</body>
+</html>
