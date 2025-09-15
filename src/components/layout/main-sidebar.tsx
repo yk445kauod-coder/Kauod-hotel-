@@ -37,18 +37,17 @@ export function MainSidebar() {
       </div>
       <nav className="flex flex-col gap-2 p-4">
         {navItems.map((item) => (
-           <Link href={item.href} key={item.href} passHref>
-            <Button
+           <Button
+              key={item.href}
               variant={pathname.startsWith(item.href) ? "secondary" : "ghost"}
               className="w-full justify-start text-base py-6"
-              asChild={pathname.startsWith(item.href)}
+              asChild
             >
-              <a>
+              <Link href={item.href}>
                 <item.icon className="me-3 h-5 w-5" />
                 {t(item.label)}
-              </a>
+              </Link>
             </Button>
-          </Link>
         ))}
       </nav>
     </div>
