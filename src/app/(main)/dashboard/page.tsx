@@ -47,12 +47,11 @@ export default function DashboardPage() {
           src="https://ik.imagekit.io/iz3ll61i9/IMG-20250718-WA0013.jpg?updatedAt=1752865961674"
           alt="Hotel Room"
           fill
-          objectFit="cover"
-          className="brightness-50"
+          className="object-cover brightness-50"
         />
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white bg-black/40 p-4">
           <h1 className="text-4xl md:text-6xl font-bold font-headline tracking-tight text-gold">{t('hotel.name')}</h1>
-          <p className="mt-4 max-w-2xl text-lg md:text-xl text-light-gold">{t('hotel.description_en')}</p>
+          <p className="mt-4 max-w-2xl text-lg md:text-xl text-light-gold">{t('hotel.description')}</p>
           <Button asChild size="lg" className="mt-8 bg-gold text-dark-brown hover:bg-light-gold">
             <Link href="/service-request">{t('dashboard.book_now')}</Link>
           </Button>
@@ -102,9 +101,8 @@ export default function DashboardPage() {
                 </div>
               ))}
             </div>
-         </div>
+        </div>
       </section>
-
     </div>
   );
 }

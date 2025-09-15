@@ -6,11 +6,10 @@ import { Copyright, MapPin, Phone, User } from "lucide-react";
 export function Footer() {
     const { t } = useTranslation();
 
-    // Data based on the provided JSON configuration
     const hotelInfo = {
-      name: "فندق قاعود",
-      address: "133 طريق الجيش، سبورتنج، الإسكندرية، مصر",
-      bookingManager: "أ/محمد مجدي",
+      name: t('hotel.name'),
+      address: t('hotel.location'),
+      bookingManager: t('hotel.booking_manager'),
       bookingPhone: "01226424581",
       otherPhones: ["035443800", "035434513", "035431008"],
       internalNumbers: {
