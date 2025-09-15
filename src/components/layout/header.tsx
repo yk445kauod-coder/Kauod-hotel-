@@ -38,7 +38,7 @@ export function Header() {
       <div className="container mx-auto flex h-20 items-center justify-between">
         <Link href="/" className="flex items-center gap-3">
           <Image src="https://ik.imagekit.io/iz3ll61i9/IMG-20250718-WA0019.jpg" alt="Kaoud Hotel Logo" width={50} height={50} className="rounded-full" />
-          <span className="text-xl font-bold font-headline text-primary">{t('hotel.name')}</span>
+          <span className="text-xl font-bold font-headline text-primary">فندق قاعود</span>
         </Link>
         
         <nav className="hidden md:flex items-center gap-6">
@@ -75,9 +75,9 @@ export function Header() {
                   <span className="sr-only">{t('nav.toggle')}</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left">
-                <SheetTitle className="sr-only">Menu</SheetTitle>
-                <SheetDescription className="sr-only">Hotel navigation menu</SheetDescription>
+              <SheetContent side="left" className="p-0">
+                 <SheetTitle className="sr-only">Menu</SheetTitle>
+                 <SheetDescription className="sr-only">Hotel navigation menu</SheetDescription>
                 <MainSidebar />
               </SheetContent>
             </Sheet>
