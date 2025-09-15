@@ -33,12 +33,7 @@ const hotelFeatures = [
     "features.free_wifi",
     "features.daily_cleaning",
     "features.cafe",
-    "features.ai_assistant",
-    "features.rating_system",
-    "features.interactive_guide",
-    "features.sidebar",
-    "features.multilingual",
-    "features.e_booking"
+    "features.restaurant"
 ];
 
 export default function DashboardPage() {
@@ -51,13 +46,13 @@ export default function DashboardPage() {
         <Image
           src="https://ik.imagekit.io/iz3ll61i9/IMG-20250718-WA0013.jpg?updatedAt=1752865961674"
           alt="Hotel Room"
-          layout="fill"
+          fill
           objectFit="cover"
           className="brightness-50"
         />
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white bg-black/40 p-4">
-          <h1 className="text-4xl md:text-6xl font-bold font-headline tracking-tight text-gold">{t('dashboard.title')}</h1>
-          <p className="mt-4 max-w-2xl text-lg md:text-xl text-light-gold">{t('dashboard.subtitle')}</p>
+          <h1 className="text-4xl md:text-6xl font-bold font-headline tracking-tight text-gold">{t('hotel.name')}</h1>
+          <p className="mt-4 max-w-2xl text-lg md:text-xl text-light-gold">{t('hotel.description_en')}</p>
           <Button asChild size="lg" className="mt-8 bg-gold text-dark-brown hover:bg-light-gold">
             <Link href="/service-request">{t('dashboard.book_now')}</Link>
           </Button>
@@ -75,7 +70,7 @@ export default function DashboardPage() {
               return (
                 <Card key={feature.href} className="text-center transform transition-transform duration-300 hover:-translate-y-2 hover:shadow-xl border-primary/20">
                    <CardHeader className="items-center">
-                    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary-gold/10 text-primary-gold">
+                    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-gold">
                       <Icon className="h-8 w-8" />
                     </div>
                     <CardTitle className="font-headline text-primary">{t(feature.titleKey)}</CardTitle>

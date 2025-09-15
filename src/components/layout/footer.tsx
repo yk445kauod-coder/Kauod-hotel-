@@ -1,16 +1,16 @@
+"use client";
+
 import { useTranslation } from "@/hooks/use-translation";
-import { Copyright, Gem, MapPin, Phone, Mail, User, Clock } from "lucide-react";
-import Link from 'next/link';
+import { Copyright, Gem, MapPin, Phone, User } from "lucide-react";
 
 export function Footer() {
     const { t } = useTranslation();
 
     const hotelConfig = {
       name: t('hotel.name'),
-      stars: t('hotel.stars'),
-      address: t('hotel.address'),
+      address: t('hotel.location'),
       contact: {
-        bookingManager: t('hotel.bookingManager'),
+        bookingManager: t('hotel.booking_manager_en'),
         bookingPhone: "01226424581",
         additionalPhones: ["035443800", "035434513", "035431008"]
       },
@@ -25,10 +25,6 @@ export function Footer() {
             <div className="container mx-auto grid grid-cols-1 gap-8 px-4 py-12 md:grid-cols-2 lg:grid-cols-4">
                 <div>
                     <h3 className="font-headline text-lg font-semibold text-primary">{hotelConfig.name}</h3>
-                    <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-                        <Gem className="h-4 w-4 text-accent" />
-                        <span>{hotelConfig.stars}</span>
-                    </div>
                      <div className="mt-2 flex items-start gap-2 text-sm text-muted-foreground">
                         <MapPin className="h-4 w-4 shrink-0 mt-1 text-accent" />
                         <span>{hotelConfig.address}</span>
@@ -60,7 +56,7 @@ export function Footer() {
                     <h3 className="font-headline text-lg font-semibold text-primary">{t('footer.internal_numbers')}</h3>
                     <div className="mt-4 grid grid-cols-2 gap-2 text-sm text-muted-foreground">
                         <span>{t('hotel.internal.reception')}: {hotelConfig.internalNumbers.reception}</span>
-                        <span>{t('hotel.internal.roomService')}: {hotelConfig.internalNumbers.roomService}</span>
+                        <span>{t('hotel.internal.room_service')}: {hotelConfig.internalNumbers.roomService}</span>
                         <span>{t('hotel.internal.laundry')}: {hotelConfig.internalNumbers.laundry}</span>
                         <span>{t('hotel.internal.maintenance')}: {hotelConfig.internalNumbers.maintenance}</span>
                         <span>{t('hotel.internal.security')}: {hotelConfig.internalNumbers.security}</span>

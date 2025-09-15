@@ -8,13 +8,15 @@
     "toggle": "Toggle Menu"
   },
   "hotel": {
-    "name": "Kaoud Hotel",
-    "stars": "Three Stars",
-    "address": "133 El Geish Road, Sporting, Alexandria, Egypt",
-    "bookingManager": "Mr. Mohamed Magdy",
-     "internal": {
+    "name": "Kauod Hotel",
+    "name_en": "Kauod Hotel",
+    "description_en": "A luxury hotel located in the heart of Alexandria, providing distinguished accommodation and premium services for our guests with warm and welcoming atmosphere.",
+    "location_en": "133 Army Road, Sporting, Alexandria, Egypt",
+    "booking_manager_en": "Mr. Mohamed Magdy",
+    "working_hours_en": "24 hours",
+    "internal": {
       "reception": "Reception",
-      "roomService": "Room Service",
+      "room_service": "Room Service",
       "laundry": "Laundry",
       "maintenance": "Maintenance",
       "security": "Security",
@@ -28,9 +30,9 @@
     "rights": "All rights reserved."
   },
   "dashboard": {
-    "title": "Welcome to Kaoud Hotel",
-    "subtitle": "A luxurious hotel in the heart of Alexandria offering a distinguished stay and high-end services.",
-    "book_now": "Book Now",
+    "title": "Welcome to Kauod Hotel",
+    "subtitle": "A luxury hotel in the heart of Alexandria offering a distinguished stay and high-end services.",
+    "book_now": "Request Service Now",
     "our_services": "Our Services",
     "services_subtitle": "We are here to make your stay unforgettable. Explore our services designed for your comfort.",
     "chat_card_title": "AI Assistant",
@@ -47,12 +49,7 @@
     "free_wifi": "Free Wi-Fi",
     "daily_cleaning": "Daily Cleaning",
     "cafe": "Coffee Shop",
-    "ai_assistant": "AI Assistant",
-    "rating_system": "Rating System",
-    "interactive_guide": "Interactive Guide",
-    "sidebar": "Side Menu",
-    "multilingual": "Multilingual",
-    "e_booking": "E-Booking"
+    "restaurant": "Fine Dining Restaurant"
   },
   "chat": {
     "title": "AI Chat Assistant",
@@ -61,18 +58,18 @@
     "send": "Send"
   },
   "menu": {
-    "title": "Kaoud Hotel Menu",
+    "title": "Kauod Hotel Food Menu",
     "download": "Download Menu",
     "print": "Print Menu",
     "notes_title": "Important Notes",
-    "notes_content": "Prices include VAT. Prices are subject to change without prior notice. All rights reserved to Kaoud Hotel.",
+    "notes_content": "Prices include VAT. Prices are subject to change without prior notice. All rights reserved to Kauod Hotel.",
      "table": {
         "item": "Item",
         "price": "Price"
     }
   },
   "services": {
-    "title": "Service Request - Kaoud Hotel",
+    "title": "Service Request - Kauod Hotel",
     "form": {
       "room_number": "Room Number",
       "room_number_placeholder": "Please enter your room number",

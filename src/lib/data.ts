@@ -1,17 +1,9 @@
-import type { ImagePlaceholder } from './placeholder-images';
-import { PlaceHolderImages } from './placeholder-images';
-
-const imageMap = new Map<string, ImagePlaceholder>(
-  PlaceHolderImages.map(img => [img.id, img])
-);
-
 export interface MenuItem {
   id: string;
   name: string;
   en_name: string;
   description: string;
   price: string;
-  image?: ImagePlaceholder;
 }
 
 export interface MenuCategory {
@@ -56,7 +48,7 @@ export const menuData: MenuCategory[] = [
     {
       id: "pastas",
       name: "العجائن والنشويات",
-      en_name: "Pasta & Carbs",
+      en_name: "Pasta & Carbohydrates",
       image: "https://images.unsplash.com/photo-1608897013039-887f21d8c804?q=80&w=1926",
       items: [
         {id: "pasta1", name: "مكرونة إسباجتى", en_name: "Spaghetti", description: "", price: "55.00"},
@@ -73,7 +65,7 @@ export const menuData: MenuCategory[] = [
     {
       id: "main-courses",
       name: "الأطباق الرئيسية",
-      en_name: "Main Courses",
+      en_name: "Main Dishes",
       image: "https://images.unsplash.com/photo-1600891964092-4316c288032e?q=80&w=2070",
       items: [
         {id: "main1", name: "سجق مشوي", en_name: "Grilled Sausage", description: "", price: "170.00"},
