@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { chatbotAction } from "@/actions";
+import { chatbotAction } from "@/lib/actions";
 import { Bot, User, Send, Loader2 } from "lucide-react";
 import { useTranslation } from "@/hooks/use-translation";
 

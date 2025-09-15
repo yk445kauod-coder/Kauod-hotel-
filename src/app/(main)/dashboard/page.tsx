@@ -36,19 +36,22 @@ export default function DashboardPage() {
         <p className="text-muted-foreground">{t('dashboard.subtitle')}</p>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {featureCards.map((feature) => (
-          <Link href={feature.href} key={feature.href} passHref>
-            <Card className="h-full transform transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg">
-              <CardHeader>
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <feature.icon className="h-6 w-6" />
-                </div>
-                <CardTitle className="font-headline">{t(feature.titleKey)}</CardTitle>
-                <CardDescription>{t(feature.descriptionKey)}</CardDescription>
-              </CardHeader>
-            </Card>
-          </Link>
-        ))}
+        {featureCards.map((feature) => {
+          const Icon = feature.icon;
+          return (
+            <Link href={feature.href} key={feature.href} passHref>
+              <Card className="h-full transform transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg">
+                <CardHeader>
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                    <Icon className="h-6 w-6" />
+                  </div>
+                  <CardTitle className="font-headline">{t(feature.titleKey)}</CardTitle>
+                  <CardDescription>{t(feature.descriptionKey)}</CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

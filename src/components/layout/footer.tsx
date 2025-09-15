@@ -1,4 +1,4 @@
-import { getHotelInfoAction } from "@/actions";
+import { getHotelInfoAction } from "@/lib/actions";
 import { parseHotelInfo } from "@/lib/utils";
 import { Copyright, Gem, MapPin, Phone } from "lucide-react";
 
