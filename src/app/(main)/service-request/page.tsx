@@ -1,14 +1,18 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useEffect, useState, useRef, FormEvent } from 'react';
 import { useLanguage } from '@/hooks/use-language';
 import { useTranslation } from '@/hooks/use-translation';
+import { useUser } from '@/context/user-context';
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref, push, onChildAdded, serverTimestamp } from "firebase/database";
-import Swal from 'sweetalert2';
-import { Star } from 'lucide-react';
-import { Analytics } from "@vercel/analytics/react";
+import { getDatabase, ref, onChildAdded, serverTimestamp, push, onValue, off } from "firebase/database";
+import { Star, Send, Loader2, Bot, User as UserIcon } from 'lucide-react';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { submitServiceRequestAction } from '@/lib/actions';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const firebaseConfig = {
     apiKey: "AIzaSyApgrwfyrVJYsihy9tUwPfazdNYZPqWbow",
@@ -23,159 +27,201 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+type Message = {
+    id: string;
+    role: 'user' | 'admin' | 'system';
+    text: string;
+    timestamp: number;
+    rating?: number;
+    type?: 'Food Order' | 'Service Request';
+    total?: number;
+};
+
 export default function ServiceRequestPage() {
-  const { language, setLanguage } = useLanguage();
+  const { language } = useLanguage();
   const { t } = useTranslation();
-  const { register, handleSubmit, reset, formState: { errors } } = useForm();
+  const { user, isDataGateOpen, setDataGateOpen } = useUser();
+  const { toast } = useToast();
+
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
-  const [replies, setReplies] = useState<{key: string, text: string, timestamp: number}[]>([]);
-  const [room, setRoom] = useState<string | null>(null);
-  
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+
   useEffect(() => {
-    async function askLanguage() {
-      const { value: chosenLang } = await Swal.fire({
-        title: "Choose Language / اختر اللغة",
-        input: "radio",
-        inputOptions: { ar: "🇪🇬 العربية", en: "🇬🇧 English" },
-        inputValue: language,
-        inputValidator: (value) => !value && "You need to choose!",
-        confirmButtonText: "Continue",
-        customClass: {
-            popup: 'font-body',
-            title: 'font-headline',
+    if (!user.roomNumber) {
+        if (!isDataGateOpen) {
+           setDataGateOpen(true);
         }
-      });
-      if (chosenLang) {
-        setLanguage(chosenLang as 'ar' | 'en');
-      }
+        return;
     }
-    askLanguage();
-  }, [setLanguage, language]);
 
+    const commentsRef = ref(db, `rooms/room_${user.roomNumber}/comments`);
+    const repliesRef = ref(db, `rooms/room_${user.roomNumber}/replies`);
 
-  useEffect(() => {
-    if (!room) return;
-
-    const repliesRef = ref(db, `rooms/room_${room}/replies`);
-    const unsubscribe = onChildAdded(repliesRef, (snapshot) => {
+    const handleNewMessage = (snapshot: any, role: 'user' | 'admin') => {
         const data = snapshot.val();
-        setReplies(prev => [...prev, {key: snapshot.key!, ...data}]);
-    });
-
-    return () => unsubscribe();
-  }, [room]);
-
-
-  const onSubmit = async (data: any) => {
-    const { roomNumber, guestName, guestPhone, guestMessage } = data;
-    if (!roomNumber || !guestMessage) return;
-
-    const commentsRef = ref(db, `rooms/room_${roomNumber}/comments`);
-    let fullMessage = `${guestName} (${guestPhone}): ${guestMessage}`;
-    if (rating > 0) {
-      fullMessage += ` ⭐ تقييم: ${rating} نجوم`;
-    }
-
-    try {
-        await push(commentsRef, { text: fullMessage, timestamp: serverTimestamp(), rating });
-        Swal.fire({
-            icon: 'success',
-            title: t('services.success_title'),
-            text: t('services.success_desc'),
-            confirmButtonText: 'OK',
-            customClass: {
-                popup: 'font-body',
-                title: 'font-headline text-primary',
-                confirmButton: 'bg-primary'
-            }
+        setMessages(prev => {
+            if (prev.some(m => m.id === snapshot.key)) return prev;
+            return [...prev, { id: snapshot.key!, role, ...data }];
         });
-        reset();
+    };
+    
+    const commentsListener = onChildAdded(commentsRef, (snapshot) => handleNewMessage(snapshot, 'user'));
+    const repliesListener = onChildAdded(repliesRef, (snapshot) => handleNewMessage(snapshot, 'admin'));
+
+    // Fetch initial messages
+    onValue(commentsRef, (snapshot) => {
+        const commentsData = snapshot.val() || {};
+        const allComments = Object.entries(commentsData).map(([id, msg]: [string, any]) => ({ id, role: 'user' as const, ...msg }));
+        
+        onValue(repliesRef, (snapshot) => {
+            const repliesData = snapshot.val() || {};
+            const allReplies = Object.entries(repliesData).map(([id, msg]: [string, any]) => ({ id, role: 'admin' as const, ...msg }));
+
+            const combined = [...allComments, ...allReplies].sort((a, b) => a.timestamp - b.timestamp);
+            setMessages(combined);
+        }, { onlyOnce: true });
+
+    }, { onlyOnce: true });
+
+
+    return () => {
+      off(commentsRef, 'child_added', commentsListener);
+      off(repliesRef, 'child_added', repliesListener);
+    };
+
+  }, [user.roomNumber, isDataGateOpen, setDataGateOpen]);
+  
+   useEffect(() => {
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTo({
+        top: scrollAreaRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [messages]);
+
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || isLoading) return;
+
+    setIsLoading(true);
+
+    const formData = new FormData();
+    formData.append('roomNumber', user.roomNumber!);
+    formData.append('guestName', user.name || 'Guest');
+    formData.append('guestPhone', user.phone || 'N/A');
+    formData.append('guestMessage', input);
+    if(rating > 0) formData.append('rating', rating.toString());
+    formData.append('type', 'Service Request');
+
+
+    const result = await submitServiceRequestAction(formData);
+    
+    if (result.success) {
+        setInput('');
         setRating(0);
-        setRoom(roomNumber); // Start listening for replies for this room
-    } catch (error) {
-         Swal.fire({
-            icon: 'error',
-            title: t('services.error_title'),
-            text: t('services.error_desc'),
-            confirmButtonText: 'OK'
-        });
+    } else {
+        toast({ title: t('services.error_title'), description: result.error, variant: 'destructive'});
     }
+    setIsLoading(false);
   };
   
   const formatTimestamp = (ts: number) => {
+    if (!ts) return '';
     const date = new Date(ts);
     return date.toLocaleString(language === "ar" ? "ar-EG" : "en-US", {
-      year: "numeric", month: "long", day: "numeric",
       hour: "2-digit", minute: "2-digit", hour12: true
     });
   }
 
-  return (
-    <div className="font-body bg-gradient-to-b from-rich-brown to-dark-brown" dir={language === 'ar' ? 'rtl' : 'ltr'}>
-        <div className="container mx-auto p-4 md:p-8">
-            <h2 className="text-center text-gold text-3xl md:text-4xl font-headline mb-6">{t('services.title')}</h2>
-            <form onSubmit={handleSubmit(onSubmit)} className="max-w-xl mx-auto bg-white p-8 rounded-2xl shadow-lg text-dark-brown">
-                <div className="mb-4">
-                    <label htmlFor="roomNumber" className="block mb-1 font-bold text-rich-brown">{t('services.form.room_number')}</label>
-                    <input type="number" id="roomNumber" {...register("roomNumber", { required: true, min: 100 })} className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-gold focus:border-transparent"/>
-                    {errors.roomNumber && <span className="text-red-500 text-sm">{t('services.form.room_number_placeholder')}</span>}
-                </div>
-                <div className="mb-4">
-                    <label htmlFor="guestName" className="block mb-1 font-bold text-rich-brown">{t('services.form.name')}</label>
-                    <input type="text" id="guestName" {...register("guestName", { required: true })} className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-gold focus:border-transparent"/>
-                    {errors.guestName && <span className="text-red-500 text-sm">{t('services.form.name_placeholder')}</span>}
-                </div>
-                <div className="mb-4">
-                    <label htmlFor="guestPhone" className="block mb-1 font-bold text-rich-brown">{t('services.form.phone')}</label>
-                    <input type="tel" id="guestPhone" {...register("guestPhone", { required: true })} className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-gold focus:border-transparent"/>
-                    {errors.guestPhone && <span className="text-red-500 text-sm">{t('services.form.phone_placeholder')}</span>}
-                </div>
-                <div className="mb-4">
-                    <label htmlFor="guestMessage" className="block mb-1 font-bold text-rich-brown">{t('services.form.message')}</label>
-                    <textarea id="guestMessage" rows={4} {...register("guestMessage", { required: true })} className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-gold focus:border-transparent"></textarea>
-                    {errors.guestMessage && <span className="text-red-500 text-sm">{t('services.form.message_placeholder')}</span>}
-                </div>
-                
-                 <div className="mb-6">
-                    <label className="block mb-2 font-bold text-rich-brown">{t('services.form.rating')}</label>
-                    <div className="flex flex-row-reverse justify-end items-center">
-                        {[5, 4, 3, 2, 1].map((star) => (
-                            <label key={star} className="cursor-pointer">
-                                <input type="radio" name="star" value={star} className="hidden" onClick={() => setRating(star)} />
-                                <Star
-                                    onMouseEnter={() => setHoverRating(star)}
-                                    onMouseLeave={() => setHoverRating(0)}
-                                    className={`w-8 h-8 transition-colors ${
-                                        (hoverRating || rating) >= star ? 'text-gold' : 'text-gray-300'
-                                    }`}
-                                    fill={(hoverRating || rating) >= star ? 'currentColor' : 'none'}
-                                />
-                            </label>
-                        ))}
-                    </div>
-                </div>
-
-                <button type="submit" className="w-full p-4 bg-rich-brown text-white font-bold text-lg rounded-lg shadow-md hover:bg-dark-brown transition-colors">
-                   {t('services.form.submit')}
-                </button>
-            </form>
-            
-            {replies.length > 0 && (
-                 <div className="max-w-xl mx-auto mt-8 bg-cream p-6 rounded-xl shadow-lg text-dark-brown">
-                    <h3 className="mb-4 text-xl font-bold text-accent">{t('services.admin_reply_title')}</h3>
-                    <div className="space-y-4">
-                        {replies.map((reply) => (
-                             <div key={reply.key} className="bg-[#efebe9] p-4 rounded-lg border-r-4 border-light-brown">
-                                 <p className="font-bold text-sm text-gray-600">{formatTimestamp(reply.timestamp)}</p>
-                                 <p className="mt-1">{reply.text}</p>
-                             </div>
-                        ))}
-                    </div>
-                </div>
-            )}
+  if (!user.roomNumber) {
+    return (
+        <div className="flex items-center justify-center h-[calc(100vh-200px)] text-muted-foreground">
+            <p>{t('services.enter_room_number_first')}</p>
         </div>
-        <Analytics />
+    );
+  }
+
+  return (
+    <div className="font-body bg-cream" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+        <div className="container mx-auto p-0 md:p-4 h-[calc(100vh-100px)] flex flex-col">
+           <div className="flex-1 flex flex-col bg-white rounded-lg shadow-lg border border-gray-200">
+               <header className="p-4 border-b">
+                  <h2 className="text-xl font-bold text-primary">{t('services.title_chat')} - {t('admin.table.room')} {user.roomNumber}</h2>
+               </header>
+               
+               <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
+                 <div className="space-y-6">
+                    {messages.map((message) => (
+                         <div key={message.id} className={`flex items-end gap-3 ${ message.role === 'user' ? 'justify-end' : '' }`}>
+                            {message.role === 'admin' && (
+                                <Avatar className="h-8 w-8">
+                                    <AvatarFallback><Bot /></AvatarFallback>
+                                </Avatar>
+                            )}
+                            <div className={`max-w-md rounded-lg p-3 text-sm ${ message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted' }`}>
+                                 <p style={{ whiteSpace: "pre-wrap" }}>{message.text}</p>
+                                 {message.rating && (
+                                     <div className="flex items-center mt-2">
+                                        {[...Array(5)].map((_, i) => (
+                                             <Star key={i} className={`w-4 h-4 ${i < message.rating! ? 'text-gold fill-gold' : 'text-gray-300' }`} />
+                                        ))}
+                                    </div>
+                                 )}
+                                 <p className="text-xs text-right mt-1 opacity-70">{formatTimestamp(message.timestamp)}</p>
+                            </div>
+                            {message.role === 'user' && (
+                                <Avatar className="h-8 w-8">
+                                    <AvatarFallback><UserIcon /></AvatarFallback>
+                                </Avatar>
+                            )}
+                         </div>
+                    ))}
+                 </div>
+               </ScrollArea>
+               
+               <footer className="p-4 border-t bg-gray-50">
+                    <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+                         <div className="flex items-center">
+                            <label className="text-sm font-bold text-rich-brown me-4">{t('services.form.rating')}</label>
+                            <div className="flex flex-row-reverse justify-end items-center">
+                                {[5, 4, 3, 2, 1].map((star) => (
+                                    <label key={star} className="cursor-pointer">
+                                        <input type="radio" name="star" value={star} className="hidden" onClick={() => setRating(star)} />
+                                        <Star
+                                            onMouseEnter={() => setHoverRating(star)}
+                                            onMouseLeave={() => setHoverRating(0)}
+                                            className={`w-6 h-6 transition-colors ${(hoverRating || rating) >= star ? 'text-gold' : 'text-gray-300'}`}
+                                            fill={(hoverRating || rating) >= star ? 'currentColor' : 'none'}
+                                        />
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="relative">
+                            <Input 
+                                value={input}
+                                onChange={(e) => setInput(e.target.value)}
+                                placeholder={t('services.form.message_placeholder')}
+                                className="pr-12"
+                                disabled={isLoading}
+                            />
+                             <Button type="submit" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8" disabled={isLoading || !input.trim()}>
+                                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                                <span className="sr-only">{t('services.form.submit')}</span>
+                            </Button>
+                        </div>
+                    </form>
+               </footer>
+           </div>
+        </div>
     </div>
   );
 }

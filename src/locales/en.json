@@ -3,17 +3,16 @@
     "dashboard": "Home",
     "chat": "AI Assistant",
     "menu": "Food Menu",
-    "services": "Service Request",
+    "services": "Requests & Services",
     "admin": "Admin Panel",
     "toggle": "Toggle Menu"
   },
   "hotel": {
     "name": "Kauod Hotel",
-    "name_en": "Kauod Hotel",
-    "description_en": "A luxury hotel located in the heart of Alexandria, providing distinguished accommodation and premium services for our guests with warm and welcoming atmosphere.",
-    "location_en": "133 Army Road, Sporting, Alexandria, Egypt",
-    "booking_manager_en": "Mr. Mohamed Magdy",
-    "working_hours_en": "24 hours",
+    "description": "A luxury hotel located in the heart of Alexandria, providing distinguished accommodation and premium services for our guests with a warm and welcoming atmosphere.",
+    "location": "133 Army Road, Sporting, Alexandria, Egypt",
+    "booking_manager": "Mr. Mohamed Magdy",
+    "working_hours": "24 hours",
     "internal": {
       "reception": "Reception",
       "room_service": "Room Service",
@@ -39,8 +38,8 @@
     "chat_card_desc": "Ask questions and get instant help from our AI.",
     "menu_card_title": "Food Menu",
     "menu_card_desc": "Explore our delicious and carefully prepared dishes.",
-    "services_card_title": "Request a Service",
-    "services_card_desc": "Need something? Request a service directly from your room.",
+    "services_card_title": "Requests & Services",
+    "services_card_desc": "Need something? Request a service or food directly from your room.",
     "learn_more": "Learn More",
     "hotel_features": "Hotel Features"
   },
@@ -66,10 +65,21 @@
      "table": {
         "item": "Item",
         "price": "Price"
+    },
+    "cart": {
+      "title": "Order Cart",
+      "description": "Review your items before sending the order to the kitchen.",
+      "add": "Add",
+      "added": "Added to cart",
+      "empty": "Your cart is empty.",
+      "total": "Total",
+      "checkout": "Checkout"
     }
   },
   "services": {
     "title": "Service Request - Kauod Hotel",
+    "title_chat": "Room Requests & Services",
+    "enter_room_number_first": "Please enter your details first to access this page.",
     "form": {
       "room_number": "Room Number",
       "room_number_placeholder": "Please enter your room number",
@@ -78,12 +88,12 @@
       "phone": "Phone Number",
       "phone_placeholder": "Please enter your phone number",
       "message": "Your Request / Message",
-      "message_placeholder": "Please write your request here",
+      "message_placeholder": "Type your request or message here...",
       "rating": "Rate our service (optional)",
       "submit": "📩 Submit Request"
     },
     "success_title": "✅ Request Sent!",
-    "success_desc": "Thank you! The administration will reply to you shortly.",
+    "success_desc": "Thank you! Your request is now being processed.",
     "error_title": "Error",
     "error_desc": "An error occurred while sending your request. Please try again.",
     "admin_reply_title": "📨 Admin Reply:"
@@ -111,5 +121,11 @@
     "english": "English",
     "arabic": "العربية"
   },
-  "currency": "EGP"
+  "currency": "EGP",
+  "loading": "Loading...",
+  "data_gate": {
+    "title": "Guest Information",
+    "description": "Please enter your details to continue. You will only need to do this once.",
+    "submit": "Save & Continue"
+  }
 }

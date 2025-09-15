@@ -55,9 +55,11 @@ export async function submitServiceRequestAction(formData: FormData) {
         guestPhone: formData.get('guestPhone') as string,
         guestMessage: formData.get('guestMessage') as string,
         rating: formData.get('rating') ? parseInt(formData.get('rating') as string) : null,
+        type: formData.get('type') as 'Food Order' | 'Service Request' | null,
+        total: formData.get('total') ? parseFloat(formData.get('total') as string) : null,
     };
     
-    const { roomNumber, guestName, guestPhone, guestMessage, rating } = rawFormData;
+    const { roomNumber, guestName, guestPhone, guestMessage, rating, type, total } = rawFormData;
 
     if (!roomNumber || !guestMessage) {
         return { success: false, error: "Room number and message are required." };
@@ -66,30 +68,33 @@ export async function submitServiceRequestAction(formData: FormData) {
     try {
         const commentsRef = ref(db, `rooms/room_${roomNumber}/comments`);
         
-        let fullMessage = `${guestName} (${guestPhone}): ${guestMessage}`;
-        if (rating) {
-            fullMessage += ` ⭐ Rating: ${rating} Stars`;
-        }
-
         await push(commentsRef, { 
-            text: fullMessage, 
+            text: guestMessage,
             timestamp: serverTimestamp(),
-            rating: rating || null
+            rating: rating || null,
+            type: type || 'Service Request',
+            total: total || null,
+            guestName: guestName,
+            guestPhone: guestPhone
         });
 
         revalidatePath('/admin');
         
-        // Optionally, generate recommendations
-        try {
-            const recommendations = await generateServiceRecommendations({
-                guestRequest: rawFormData.guestMessage,
-                hotelDetails: hotelInfoString,
-            });
-            return { success: true, recommendations: recommendations.recommendations };
-        } catch (error) {
-            console.error("Error generating recommendations:", error);
-            return { success: true, recommendations: [] }; // Still success, even if recommendations fail
+        // Optionally, generate recommendations for non-food orders
+        if (type !== 'Food Order') {
+            try {
+                const recommendations = await generateServiceRecommendations({
+                    guestRequest: guestMessage,
+                    hotelDetails: hotelInfoString,
+                });
+                return { success: true, recommendations: recommendations.recommendations };
+            } catch (error) {
+                console.error("Error generating recommendations:", error);
+                return { success: true, recommendations: [] }; // Still success, even if recommendations fail
+            }
         }
+
+        return { success: true, recommendations: [] };
 
     } catch (error) {
         console.error("Firebase push error:", error);
