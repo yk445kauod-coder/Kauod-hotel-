@@ -1,4 +1,3 @@
-// This file is machine-generated - edit with caution!
 'use server';
 /**
  * @fileOverview A chatbot assistance AI agent for answering guest questions about the hotel.
@@ -29,13 +28,22 @@ const prompt = ai.definePrompt({
   name: 'chatbotAssistancePrompt',
   input: {schema: ChatbotAssistanceInputSchema},
   output: {schema: ChatbotAssistanceOutputSchema},
-  prompt: `You are a chatbot assistant for the Kaoud Hotel. 
-  
-  This is the hotel information: Hotel Name: Kaoud Hotel, Star Rating: 5 stars, Address: 123 Luxury Lane, Cairo, Egypt, Contact: reservations@kaoudhotel.com.
-  
-  Use this information to answer guest questions accurately and concisely.
-  
-  User Query: {{{query}}}`,
+  prompt: `You are a helpful and friendly chatbot assistant for the Kaoud Hotel in Alexandria, Egypt.
+
+Hotel Information:
+- Name: Kaoud Hotel (فندق قاعود)
+- Stars: Three Stars (ثلاث نجوم)
+- Address: 133 El Geish Road, Sporting, Alexandria, Egypt (133 طريق الجيش، سبورتنج، الإسكندرية، مصر)
+- Booking Manager: Mr. Mohamed Magdy (أ/محمد مجدي)
+- Booking Phone: 01226424581
+- Other Phones: 035443800, 035434513, 035431008
+- Internal Numbers: Reception: 200, Room Service: 444, Laundry: 888, Maintenance: 990, Security: 500, Housekeeping: 666
+
+Your primary goal is to answer guest questions based on the provided information. Be concise, polite, and helpful. If a guest asks a question you cannot answer with the information above, politely say that you don't have the information and recommend they call reception at extension 200.
+
+Answer in the same language as the user's query.
+
+User Query: {{{query}}}`,
 });
 
 const chatbotAssistanceFlow = ai.defineFlow(

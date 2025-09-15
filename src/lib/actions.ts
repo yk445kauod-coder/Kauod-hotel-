@@ -3,19 +3,35 @@
 import { chatbotAssistance } from '@/ai/flows/chatbot-assistance';
 import { generateServiceRecommendations } from '@/ai/flows/personalized-service-recommendations';
 import { revalidatePath } from 'next/cache';
+import { initializeApp } from "firebase/app";
+import { getDatabase, ref, push, serverTimestamp } from "firebase/database";
 
-// In-memory store for demonstration purposes
-let serviceRequests: Array<{ id: number; room: string; name: string; phone: string; message: string; status: 'Pending' | 'Replied'; reply?: string }> = [
-    { id: 1, room: '101', name: 'John Doe', phone: '123-456-7890', message: 'I need more pillows.', status: 'Pending' },
-    { id: 2, room: '205', name: 'Jane Smith', phone: '098-765-4321', message: 'The AC is not working.', status: 'Replied', reply: 'An engineer is on their way to your room.' },
-];
-let nextId = 3;
+const firebaseConfig = {
+    apiKey: "AIzaSyApgrwfyrVJYsihy9tUwPfazdNYZPqWbow",
+    authDomain: "kaoud-hotel.firebaseapp.com",
+    databaseURL: "https://kaoud-hotel-default-rtdb.firebaseio.com",
+    projectId: "kaoud-hotel",
+    storageBucket: "kaoud-hotel.appspot.com",
+    messagingSenderId: "77309702077",
+    appId: "1:77309702077:web:1eee14c06204def2eb6cd4"
+};
 
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const hotelInfoString = `
+- Name: Kaoud Hotel (فندق قاعود)
+- Stars: Three Stars (ثلاث نجوم)
+- Address: 133 El Geish Road, Sporting, Alexandria, Egypt (133 طريق الجيش، سبورتنج، الإسكندرية، مصر)
+- Booking Manager: Mr. Mohamed Magdy (أ/محمد مجدي)
+- Booking Phone: 01226424581
+- Other Phones: 035443800, 035434513, 035431008
+- Internal Numbers: Reception: 200, Room Service: 444, Laundry: 888, Maintenance: 990, Security: 500, Housekeeping: 666
+`;
 
 export async function getHotelInfoAction() {
     try {
-        const hotelInfoToolResponse = `Hotel Name: Kaoud Hotel, Star Rating: 5 stars, Address: 123 Luxury Lane, Cairo, Egypt, Contact: reservations@kaoudhotel.com`;
-        return { success: true, data: hotelInfoToolResponse };
+        return { success: true, data: hotelInfoString };
     } catch (error) {
         console.error("Error fetching hotel info:", error);
         return { success: false, error: "Failed to fetch hotel information." };
@@ -34,44 +50,67 @@ export async function chatbotAction(history: any, query: string) {
 
 export async function submitServiceRequestAction(formData: FormData) {
     const rawFormData = {
-        room: formData.get('roomNumber') as string,
-        name: formData.get('name') as string,
-        phone: formData.get('phone') as string,
-        message: formData.get('message') as string,
+        roomNumber: formData.get('roomNumber') as string,
+        guestName: formData.get('guestName') as string,
+        guestPhone: formData.get('guestPhone') as string,
+        guestMessage: formData.get('guestMessage') as string,
+        rating: formData.get('rating') ? parseInt(formData.get('rating') as string) : null,
     };
-
-    // Simulate saving to database
-    const newRequest = { id: nextId++, ...rawFormData, status: 'Pending' as const };
-    serviceRequests.push(newRequest);
-    revalidatePath('/admin');
     
+    const { roomNumber, guestName, guestPhone, guestMessage, rating } = rawFormData;
+
+    if (!roomNumber || !guestMessage) {
+        return { success: false, error: "Room number and message are required." };
+    }
+
     try {
-        const hotelDetails = (await getHotelInfoAction()).data || '';
-        const recommendations = await generateServiceRecommendations({
-            guestRequest: rawFormData.message,
-            hotelDetails: hotelDetails,
+        const commentsRef = ref(db, `rooms/room_${roomNumber}/comments`);
+        
+        let fullMessage = `${guestName} (${guestPhone}): ${guestMessage}`;
+        if (rating) {
+            fullMessage += ` ⭐ Rating: ${rating} Stars`;
+        }
+
+        await push(commentsRef, { 
+            text: fullMessage, 
+            timestamp: serverTimestamp(),
+            rating: rating || null
         });
-        return { success: true, recommendations: recommendations.recommendations };
+
+        revalidatePath('/admin');
+        
+        // Optionally, generate recommendations
+        try {
+            const recommendations = await generateServiceRecommendations({
+                guestRequest: rawFormData.guestMessage,
+                hotelDetails: hotelInfoString,
+            });
+            return { success: true, recommendations: recommendations.recommendations };
+        } catch (error) {
+            console.error("Error generating recommendations:", error);
+            return { success: true, recommendations: [] }; // Still success, even if recommendations fail
+        }
+
     } catch (error) {
-        console.error("Error generating recommendations:", error);
-        // Even if recommendations fail, the request was submitted, so we still return success.
-        return { success: true, recommendations: [] };
+        console.error("Firebase push error:", error);
+        return { success: false, error: "Failed to submit request to the database." };
     }
 }
 
-export async function getServiceRequestsAction() {
-    // Simulate fetching from a database
-    return serviceRequests.sort((a, b) => b.id - a.id);
-}
-
-
-export async function submitReplyAction(requestId: number, reply: string) {
-    const request = serviceRequests.find(r => r.id === requestId);
-    if (request) {
-        request.status = 'Replied';
-        request.reply = reply;
+export async function submitReplyAction(roomId: string, reply: string) {
+    if (!roomId || !reply) {
+         return { success: false, error: "Room ID and reply are required." };
+    }
+    const replyRef = ref(db, `rooms/room_${roomId}/replies`);
+    try {
+        await push(replyRef, {
+            text: reply,
+            timestamp: serverTimestamp()
+        });
+        revalidatePath(`/service-request`); // To notify the user
         revalidatePath('/admin');
         return { success: true, message: "Reply sent successfully." };
+    } catch(e) {
+        return { success: false, error: (e as Error).message };
     }
-    return { success: false, error: "Request not found." };
 }

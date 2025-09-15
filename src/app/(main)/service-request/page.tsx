@@ -1,206 +1,181 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { submitServiceRequestAction } from '@/lib/actions';
-import { useToast } from '@/hooks/use-toast';
-import { useTranslation } from '@/hooks/use-translation';
 import { useLanguage } from '@/hooks/use-language';
+import { useTranslation } from '@/hooks/use-translation';
+import { initializeApp } from "firebase/app";
+import { getDatabase, ref, push, onChildAdded, serverTimestamp } from "firebase/database";
+import Swal from 'sweetalert2';
+import { Star } from 'lucide-react';
+import { Analytics } from "@vercel/analytics/react";
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Sparkles, Lightbulb } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+const firebaseConfig = {
+    apiKey: "AIzaSyApgrwfyrVJYsihy9tUwPfazdNYZPqWbow",
+    authDomain: "kaoud-hotel.firebaseapp.com",
+    databaseURL: "https://kaoud-hotel-default-rtdb.firebaseio.com",
+    projectId: "kaoud-hotel",
+    storageBucket: "kaoud-hotel.appspot.com",
+    messagingSenderId: "77309702077",
+    appId: "1:77309702077:web:1eee14c06204def2eb6cd4"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
 export default function ServiceRequestPage() {
-  const { t } = useTranslation();
   const { language, setLanguage } = useLanguage();
-  const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [recommendations, setRecommendations] = useState<string[]>([]);
-  const [showSuccess, setShowSuccess] = useState(false);
+  const { t } = useTranslation();
+  const { register, handleSubmit, reset, formState: { errors } } = useForm();
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [replies, setReplies] = useState<{key: string, text: string, timestamp: number}[]>([]);
+  const [room, setRoom] = useState<string | null>(null);
+  
+  useEffect(() => {
+    async function askLanguage() {
+      const { value: chosenLang } = await Swal.fire({
+        title: "Choose Language / اختر اللغة",
+        input: "radio",
+        inputOptions: { ar: "🇪🇬 العربية", en: "🇬🇧 English" },
+        inputValue: language,
+        inputValidator: (value) => !value && "You need to choose!",
+        confirmButtonText: "Continue",
+        customClass: {
+            popup: 'font-body',
+            title: 'font-headline',
+        }
+      });
+      if (chosenLang) {
+        setLanguage(chosenLang as 'ar' | 'en');
+      }
+    }
+    askLanguage();
+  }, [setLanguage, language]);
 
-  const formSchema = z.object({
-    roomNumber: z.string().min(1, t('services.form.room_number_placeholder')),
-    name: z.string().min(2, t('services.form.name_placeholder')),
-    phone: z.string().optional(),
-    message: z.string().min(10, t('services.form.message_placeholder')),
-    language: z.enum(['en', 'ar']),
-  });
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      roomNumber: '',
-      name: '',
-      phone: '',
-      message: '',
-      language: language,
-    },
-  });
+  useEffect(() => {
+    if (!room) return;
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsSubmitting(true);
-    setRecommendations([]);
-    setShowSuccess(false);
-    
-    const formData = new FormData();
-    Object.entries(values).forEach(([key, value]) => {
-      formData.append(key, value);
+    const repliesRef = ref(db, `rooms/room_${room}/replies`);
+    const unsubscribe = onChildAdded(repliesRef, (snapshot) => {
+        const data = snapshot.val();
+        setReplies(prev => [...prev, {key: snapshot.key!, ...data}]);
     });
 
-    const result = await submitServiceRequestAction(formData);
+    return () => unsubscribe();
+  }, [room]);
 
-    if (result.success) {
-      toast({
-        title: t('services.success_title'),
-        description: t('services.success_desc'),
-      });
-      setShowSuccess(true);
-      if (result.recommendations && result.recommendations.length > 0) {
-        setRecommendations(result.recommendations);
-      }
-      form.reset();
-    } else {
-      toast({
-        title: "Error",
-        description: "Failed to submit request. Please try again.",
-        variant: "destructive",
-      });
+
+  const onSubmit = async (data: any) => {
+    const { roomNumber, guestName, guestPhone, guestMessage } = data;
+    if (!roomNumber || !guestMessage) return;
+
+    const commentsRef = ref(db, `rooms/room_${roomNumber}/comments`);
+    let fullMessage = `${guestName} (${guestPhone}): ${guestMessage}`;
+    if (rating > 0) {
+      fullMessage += ` ⭐ تقييم: ${rating} نجوم`;
     }
-    setIsSubmitting(false);
+
+    try {
+        await push(commentsRef, { text: fullMessage, timestamp: serverTimestamp(), rating });
+        Swal.fire({
+            icon: 'success',
+            title: t('services.success_title'),
+            text: t('services.success_desc'),
+            confirmButtonText: 'OK',
+            customClass: {
+                popup: 'font-body',
+                title: 'font-headline text-primary',
+                confirmButton: 'bg-primary'
+            }
+        });
+        reset();
+        setRating(0);
+        setRoom(roomNumber); // Start listening for replies for this room
+    } catch (error) {
+         Swal.fire({
+            icon: 'error',
+            title: t('services.error_title'),
+            text: t('services.error_desc'),
+            confirmButtonText: 'OK'
+        });
+    }
+  };
+  
+  const formatTimestamp = (ts: number) => {
+    const date = new Date(ts);
+    return date.toLocaleString(language === "ar" ? "ar-EG" : "en-US", {
+      year: "numeric", month: "long", day: "numeric",
+      hour: "2-digit", minute: "2-digit", hour12: true
+    });
   }
 
   return (
-    <div className="grid gap-8 md:grid-cols-2">
-      <Card>
-        <CardHeader>
-          <CardTitle className="font-headline">{t('services.title')}</CardTitle>
-          <CardDescription>{t('services.description')}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="roomNumber"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('services.form.room_number')}</FormLabel>
-                    <FormControl>
-                      <Input placeholder={t('services.form.room_number_placeholder')} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('services.form.name')}</FormLabel>
-                    <FormControl>
-                      <Input placeholder={t('services.form.name_placeholder')} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('services.form.phone')}</FormLabel>
-                    <FormControl>
-                      <Input placeholder={t('services.form.phone_placeholder')} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="message"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('services.form.message')}</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder={t('services.form.message_placeholder')} {...field} rows={4} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="language"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('services.form.language')}</FormLabel>
-                    <Select onValueChange={(value) => {
-                      field.onChange(value);
-                      setLanguage(value as 'en' | 'ar');
-                    }} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select language" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="en">{t('language.english')}</SelectItem>
-                        <SelectItem value="ar">{t('language.arabic')}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" disabled={isSubmitting} className="w-full">
-                {isSubmitting && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
-                {t('services.form.submit')}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+    <div className="font-body bg-gradient-to-b from-rich-brown to-dark-brown" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+        <div className="container mx-auto p-4 md:p-8">
+            <h2 className="text-center text-gold text-3xl md:text-4xl font-headline mb-6">{t('services.title')}</h2>
+            <form onSubmit={handleSubmit(onSubmit)} className="max-w-xl mx-auto bg-white p-8 rounded-2xl shadow-lg text-dark-brown">
+                <div className="mb-4">
+                    <label htmlFor="roomNumber" className="block mb-1 font-bold text-rich-brown">{t('services.form.room_number')}</label>
+                    <input type="number" id="roomNumber" {...register("roomNumber", { required: true, min: 100 })} className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-gold focus:border-transparent"/>
+                    {errors.roomNumber && <span className="text-red-500 text-sm">{t('services.form.room_number_placeholder')}</span>}
+                </div>
+                <div className="mb-4">
+                    <label htmlFor="guestName" className="block mb-1 font-bold text-rich-brown">{t('services.form.name')}</label>
+                    <input type="text" id="guestName" {...register("guestName", { required: true })} className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-gold focus:border-transparent"/>
+                    {errors.guestName && <span className="text-red-500 text-sm">{t('services.form.name_placeholder')}</span>}
+                </div>
+                <div className="mb-4">
+                    <label htmlFor="guestPhone" className="block mb-1 font-bold text-rich-brown">{t('services.form.phone')}</label>
+                    <input type="tel" id="guestPhone" {...register("guestPhone", { required: true })} className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-gold focus:border-transparent"/>
+                    {errors.guestPhone && <span className="text-red-500 text-sm">{t('services.form.phone_placeholder')}</span>}
+                </div>
+                <div className="mb-4">
+                    <label htmlFor="guestMessage" className="block mb-1 font-bold text-rich-brown">{t('services.form.message')}</label>
+                    <textarea id="guestMessage" rows={4} {...register("guestMessage", { required: true })} className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-gold focus:border-transparent"></textarea>
+                    {errors.guestMessage && <span className="text-red-500 text-sm">{t('services.form.message_placeholder')}</span>}
+                </div>
+                
+                 <div className="mb-6">
+                    <label className="block mb-2 font-bold text-rich-brown">{t('services.form.rating')}</label>
+                    <div className="flex flex-row-reverse justify-end items-center">
+                        {[5, 4, 3, 2, 1].map((star) => (
+                            <label key={star} className="cursor-pointer">
+                                <input type="radio" name="star" value={star} className="hidden" onClick={() => setRating(star)} />
+                                <Star
+                                    onMouseEnter={() => setHoverRating(star)}
+                                    onMouseLeave={() => setHoverRating(0)}
+                                    className={`w-8 h-8 transition-colors ${
+                                        (hoverRating || rating) >= star ? 'text-gold' : 'text-gray-300'
+                                    }`}
+                                    fill={(hoverRating || rating) >= star ? 'currentColor' : 'none'}
+                                />
+                            </label>
+                        ))}
+                    </div>
+                </div>
 
-      <div className="space-y-4">
-        {showSuccess && (
-          <Alert>
-            <Sparkles className="h-4 w-4" />
-            <AlertTitle>{t('services.success_title')}</AlertTitle>
-            <AlertDescription>
-            {t('services.success_desc')}
-            </AlertDescription>
-          </Alert>
-        )}
-        {recommendations.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 font-headline">
-                <Lightbulb className="text-accent" />
-                {t('services.recommendations_title')}
-              </CardTitle>
-              <CardDescription>{t('services.recommendations_desc')}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2 list-disc list-inside text-sm">
-                {recommendations.map((rec, index) => (
-                  <li key={index}>{rec}</li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+                <button type="submit" className="w-full p-4 bg-rich-brown text-white font-bold text-lg rounded-lg shadow-md hover:bg-dark-brown transition-colors">
+                   {t('services.form.submit')}
+                </button>
+            </form>
+            
+            {replies.length > 0 && (
+                 <div className="max-w-xl mx-auto mt-8 bg-cream p-6 rounded-xl shadow-lg text-dark-brown">
+                    <h3 className="mb-4 text-xl font-bold text-accent">{t('services.admin_reply_title')}</h3>
+                    <div className="space-y-4">
+                        {replies.map((reply) => (
+                             <div key={reply.key} className="bg-[#efebe9] p-4 rounded-lg border-r-4 border-light-brown">
+                                 <p className="font-bold text-sm text-gray-600">{formatTimestamp(reply.timestamp)}</p>
+                                 <p className="mt-1">{reply.text}</p>
+                             </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+        <Analytics />
     </div>
   );
 }

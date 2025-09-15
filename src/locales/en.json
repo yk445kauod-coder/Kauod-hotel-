@@ -1,28 +1,58 @@
 {
   "nav": {
-    "dashboard": "Dashboard",
-    "chat": "Chat Assistant",
+    "dashboard": "Home",
+    "chat": "AI Assistant",
     "menu": "Food Menu",
     "services": "Service Request",
     "admin": "Admin Panel",
-    "toggle": "Toggle navigation"
+    "toggle": "Toggle Menu"
+  },
+  "hotel": {
+    "name": "Kaoud Hotel",
+    "stars": "Three Stars",
+    "address": "133 El Geish Road, Sporting, Alexandria, Egypt",
+    "bookingManager": "Mr. Mohamed Magdy",
+     "internal": {
+      "reception": "Reception",
+      "roomService": "Room Service",
+      "laundry": "Laundry",
+      "maintenance": "Maintenance",
+      "security": "Security",
+      "housekeeping": "Housekeeping"
+    }
   },
   "footer": {
-    "name": "Hotel Name",
-    "rating": "Star Rating",
-    "address": "Address",
-    "contact": "Contact",
+    "booking": "For Booking & Inquiries",
+    "contact_details": "Contact Numbers",
+    "internal_numbers": "Internal Numbers",
     "rights": "All rights reserved."
   },
   "dashboard": {
-    "title": "Welcome to Kaoud Smart Assistant",
-    "subtitle": "Your one-stop portal for all hotel services. Select an option below to get started.",
+    "title": "Welcome to Kaoud Hotel",
+    "subtitle": "A luxurious hotel in the heart of Alexandria offering a distinguished stay and high-end services.",
+    "book_now": "Book Now",
+    "our_services": "Our Services",
+    "services_subtitle": "We are here to make your stay unforgettable. Explore our services designed for your comfort.",
     "chat_card_title": "AI Assistant",
     "chat_card_desc": "Ask questions and get instant help from our AI.",
     "menu_card_title": "Food Menu",
-    "menu_card_desc": "Explore our delicious offerings.",
+    "menu_card_desc": "Explore our delicious and carefully prepared dishes.",
     "services_card_title": "Request a Service",
-    "services_card_desc": "Need something? Let us know how we can help."
+    "services_card_desc": "Need something? Request a service directly from your room.",
+    "learn_more": "Learn More",
+    "hotel_features": "Hotel Features"
+  },
+  "features": {
+    "room_service": "24h Room Service",
+    "free_wifi": "Free Wi-Fi",
+    "daily_cleaning": "Daily Cleaning",
+    "cafe": "Coffee Shop",
+    "ai_assistant": "AI Assistant",
+    "rating_system": "Rating System",
+    "interactive_guide": "Interactive Guide",
+    "sidebar": "Side Menu",
+    "multilingual": "Multilingual",
+    "e_booking": "E-Booking"
   },
   "chat": {
     "title": "AI Chat Assistant",
@@ -31,51 +61,58 @@
     "send": "Send"
   },
   "menu": {
-    "title": "Our Menu",
-    "description": "A selection of our finest dishes, drinks, and desserts.",
-    "print": "Print Menu"
+    "title": "Kaoud Hotel Menu",
+    "download": "Download Menu",
+    "print": "Print Menu",
+    "notes_title": "Important Notes",
+    "notes_content": "Prices include VAT. Prices are subject to change without prior notice. All rights reserved to Kaoud Hotel.",
+     "table": {
+        "item": "Item",
+        "price": "Price"
+    }
   },
   "services": {
-    "title": "Request a Service",
-    "description": "Fill out the form below and our team will get back to you shortly.",
+    "title": "Service Request - Kaoud Hotel",
     "form": {
       "room_number": "Room Number",
-      "room_number_placeholder": "e.g., 302",
+      "room_number_placeholder": "Please enter your room number",
       "name": "Full Name",
-      "name_placeholder": "Enter your full name",
+      "name_placeholder": "Please enter your name",
       "phone": "Phone Number",
-      "phone_placeholder": "Optional phone number",
-      "message": "Your Request",
-      "message_placeholder": "e.g., 'I need extra towels'",
-      "language": "Preferred Language",
-      "submit": "Submit Request"
+      "phone_placeholder": "Please enter your phone number",
+      "message": "Your Request / Message",
+      "message_placeholder": "Please write your request here",
+      "rating": "Rate our service (optional)",
+      "submit": "📩 Submit Request"
     },
-    "success_title": "Request Submitted!",
-    "success_desc": "Thank you! We have received your request and will attend to it shortly.",
-    "recommendations_title": "Personalized Recommendations",
-    "recommendations_desc": "Based on your request, you might also be interested in:"
+    "success_title": "✅ Request Sent!",
+    "success_desc": "Thank you! The administration will reply to you shortly.",
+    "error_title": "Error",
+    "error_desc": "An error occurred while sending your request. Please try again.",
+    "admin_reply_title": "📨 Admin Reply:"
   },
   "admin": {
-    "title": "Admin Panel",
-    "description": "Manage and respond to guest service requests.",
+    "title": "Guest Requests Admin Panel",
+    "description": "Review and respond to guest requests in real-time.",
     "table": {
       "room": "Room",
-      "name": "Name",
       "request": "Request",
-      "status": "Status",
+      "rating": "Rating",
+      "date": "Date",
       "action": "Action"
     },
-    "status_pending": "Pending",
-    "status_replied": "Replied",
     "reply_button": "Reply",
-    "reply_dialog_title": "Reply to Guest",
-    "reply_dialog_desc": "Your response will be visible to the guest.",
+    "reply_dialog_title": "Reply to Guest in Room",
+    "reply_dialog_desc": "Your reply will be sent directly to the guest.",
     "reply_placeholder": "Type your reply here...",
     "send_reply": "Send Reply",
-    "no_requests": "No service requests found."
+    "no_requests": "No service requests found.",
+    "reply_success_title": "Reply Sent",
+    "reply_success_desc": "Your reply has been successfully sent to the guest."
   },
   "language": {
     "english": "English",
-    "arabic": "Arabic"
-  }
+    "arabic": "العربية"
+  },
+  "currency": "EGP"
 }

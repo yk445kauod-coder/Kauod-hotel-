@@ -2,7 +2,7 @@
 
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 
-type Language = 'en' | 'ar';
+type Language = 'ar' | 'en';
 
 interface LanguageContextType {
   language: Language;
@@ -13,8 +13,8 @@ interface LanguageContextType {
 export const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguage] = useState<Language>('en');
-  const [dir, setDir] = useState<'ltr' | 'rtl'>('ltr');
+  const [language, setLanguage] = useState<Language>('ar');
+  const [dir, setDir] = useState<'ltr' | 'rtl'>('rtl');
 
   useEffect(() => {
     const newDir = language === 'ar' ? 'rtl' : 'ltr';
