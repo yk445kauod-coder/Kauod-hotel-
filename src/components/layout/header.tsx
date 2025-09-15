@@ -30,7 +30,7 @@ export function Header() {
     { href: "/menu", label: "nav.menu" },
     { href: "/service-request", label: "nav.services" },
     { href: "/chat", label: "nav.chat" },
-    { href: "/admin", label: "nav.admin" },
+    { href: "/about", label: "nav.about" },
   ];
 
   return (

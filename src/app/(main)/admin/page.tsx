@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref, onValue, push, serverTimestamp, set } from "firebase/database";
+import { getDatabase, ref, onValue, push, serverTimestamp, set, off } from "firebase/database";
 import {
   Table,
   TableBody,
@@ -25,10 +25,12 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, MessageSquare, Star } from 'lucide-react';
+import { Loader2, MessageSquare, Star, Sparkles } from 'lucide-react';
 import { useTranslation } from '@/hooks/use-translation';
 import { useLanguage } from '@/hooks/use-language';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { submitReplyAction, generateAdminReplyAction } from '@/lib/actions';
+
 
 const firebaseConfig = {
     apiKey: "AIzaSyApgrwfyrVJYsihy9tUwPfazdNYZPqWbow",
@@ -63,12 +65,17 @@ export default function AdminPage() {
   const [replyText, setReplyText] = useState('');
   const [isReplying, setIsReplying] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isGeneratingAiReply, setIsGeneratingAiReply] = useState(false);
   const { toast } = useToast();
   const { t } = useTranslation();
   const { language } = useLanguage();
   const roomsRef = ref(db, 'rooms');
 
   useEffect(() => {
+     if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission !== 'granted') {
+        Notification.requestPermission();
+    }
+
     const unsubscribe = onValue(roomsRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
@@ -79,6 +86,15 @@ export default function AdminPage() {
                 replies: comment.replies || {}
             })).sort((a,b) => b.timestamp - a.timestamp) : [];
 
+             if (commentsArray.length > 0) {
+                const latestCommentTime = commentsArray[0].timestamp;
+                const lastCheckTime = parseInt(localStorage.getItem(`lastCheck_${roomId}`) || '0');
+                if (latestCommentTime > lastCheckTime) {
+                    notifyNewRequest(roomId.replace('room_', ''));
+                    localStorage.setItem(`lastCheck_${roomId}`, latestCommentTime.toString());
+                }
+            }
+
             return {
                 roomId: roomId.replace('room_', ''),
                 comments: commentsArray
@@ -88,30 +104,49 @@ export default function AdminPage() {
       }
     });
 
-    return () => unsubscribe();
+    return () => off(roomsRef);
   }, []);
+
+  const notifyNewRequest = (roomId: string) => {
+    if (Notification.permission === 'granted') {
+        new Notification(t('admin.notification_title'), {
+            body: `${t('admin.notification_body')} ${roomId}`,
+            icon: '/icon.png'
+        });
+    }
+  }
 
   const handleReplySubmit = async () => {
     if (!selectedRoomId || !selectedCommentId || !replyText) return;
     setIsReplying(true);
 
-    const replyRef = ref(db, `rooms/room_${selectedRoomId}/replies`);
-    try {
-        await push(replyRef, {
-            text: replyText,
-            timestamp: serverTimestamp()
-        });
-        
+    const result = await submitReplyAction(selectedRoomId, replyText);
+
+    if (result.success) {
         toast({ title: t('admin.reply_success_title'), description: t('admin.reply_success_desc') });
         setIsDialogOpen(false);
         setReplyText('');
-    } catch(e) {
-        toast({ title: "Error", description: (e as Error).message, variant: "destructive" });
-    } finally {
-        setIsReplying(false);
+    } else {
+        toast({ title: "Error", description: result.error, variant: "destructive" });
     }
+    setIsReplying(false);
   };
   
+  const handleGenerateAiReply = async () => {
+      const guestMessage = getSelectedCommentText();
+      if (!guestMessage) return;
+
+      setIsGeneratingAiReply(true);
+      const result = await generateAdminReplyAction(guestMessage);
+      
+      if (result.success && result.response) {
+          setReplyText(result.response);
+      } else {
+          toast({ title: "AI Error", description: result.error, variant: "destructive" });
+      }
+      setIsGeneratingAiReply(false);
+  }
+
   const getSelectedCommentText = () => {
       const room = rooms.find(r => r.roomId === selectedRoomId);
       if (!room) return "";
@@ -169,6 +204,7 @@ export default function AdminPage() {
                                                     if (open) {
                                                         setSelectedRoomId(room.roomId);
                                                         setSelectedCommentId(comment.id);
+                                                        setReplyText('');
                                                     }
                                                     setIsDialogOpen(open);
                                                 }}>
@@ -186,7 +222,7 @@ export default function AdminPage() {
                                                         </DialogDescription>
                                                         </DialogHeader>
                                                         <div className="py-4">
-                                                            <p className="font-semibold text-sm">Guest Request:</p>
+                                                            <p className="font-semibold text-sm">{t('admin.guest_request')}:</p>
                                                             <p className="text-sm text-muted-foreground p-2 bg-muted rounded-md">{getSelectedCommentText()}</p>
                                                         </div>
                                                         <Textarea
@@ -195,6 +231,10 @@ export default function AdminPage() {
                                                         onChange={(e) => setReplyText(e.target.value)}
                                                         rows={4}
                                                         />
+                                                         <Button variant="ghost" onClick={handleGenerateAiReply} disabled={isGeneratingAiReply} className="w-full justify-center mt-2">
+                                                            {isGeneratingAiReply ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4 text-gold" />}
+                                                            {t('admin.ai_reply')}
+                                                        </Button>
                                                         <DialogFooter>
                                                         <Button onClick={handleReplySubmit} disabled={isReplying}>
                                                             {isReplying && <Loader2 className="me-2 h-4 w-4 animate-spin" />}

@@ -5,6 +5,8 @@ import { Footer } from "@/components/layout/footer";
 import { LanguageModal } from "@/components/layout/language-modal";
 import { DataGate } from "@/components/layout/data-gate";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import { useUser } from "@/context/user-context";
 
 export default function MainLayout({
   children,
@@ -12,6 +14,8 @@ export default function MainLayout({
   children: React.ReactNode;
 }>) {
   const [isLanguageModalOpen, setLanguageModalOpen] = useState(false);
+  const { user } = useUser();
+  const pathname = usePathname();
 
   useEffect(() => {
     const langSelected = localStorage.getItem('language_selected');
@@ -26,6 +30,8 @@ export default function MainLayout({
     }
     setLanguageModalOpen(isOpen);
   };
+  
+  const showDataGate = !user.roomNumber && (pathname === '/service-request' || pathname === '/menu');
 
   return (
     <div className="flex flex-col min-h-screen">

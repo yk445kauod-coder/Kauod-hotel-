@@ -9,6 +9,7 @@ import {
   UtensilsCrossed,
   ConciergeBell,
   Shield,
+  Info
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/hooks/use-translation";
@@ -19,7 +20,7 @@ const navItems = [
   { href: "/menu", icon: UtensilsCrossed, label: "nav.menu" },
   { href: "/service-request", icon: ConciergeBell, label: "nav.services" },
   { href: "/chat", icon: MessageCircle, label: "nav.chat" },
-  { href: "/admin", icon: Shield, label: "nav.admin" },
+  { href: "/about", icon: Info, label: "nav.about" },
 ];
 
 export function MainSidebar() {
@@ -36,16 +37,28 @@ export function MainSidebar() {
       </div>
       <nav className="flex flex-col gap-2 p-4">
         {navItems.map((item) => (
-          <Link href={item.href} key={item.href}>
+           <Link href={item.href} key={item.href} passHref>
             <Button
-              variant={pathname === item.href ? "secondary" : "ghost"}
+              variant={pathname.startsWith(item.href) ? "secondary" : "ghost"}
               className="w-full justify-start text-base py-6"
+              asChild={pathname.startsWith(item.href)}
             >
-              <item.icon className="me-3 h-5 w-5" />
-              {t(item.label)}
+              <a>
+                <item.icon className="me-3 h-5 w-5" />
+                {t(item.label)}
+              </a>
             </Button>
           </Link>
         ))}
+         <Link href="/admin" passHref>
+            <Button
+              variant={pathname.startsWith('/admin') ? "secondary" : "ghost"}
+              className="w-full justify-start text-base py-6"
+            >
+                <Shield className="me-3 h-5 w-5" />
+                {t('nav.admin')}
+            </Button>
+          </Link>
       </nav>
     </div>
   );

@@ -2,6 +2,7 @@
 
 import { chatbotAssistance } from '@/ai/flows/chatbot-assistance';
 import { generateServiceRecommendations } from '@/ai/flows/personalized-service-recommendations';
+import { generateAdminReply } from '@/ai/flows/generate-admin-reply';
 import { revalidatePath } from 'next/cache';
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, push, serverTimestamp } from "firebase/database";
@@ -80,7 +81,6 @@ export async function submitServiceRequestAction(formData: FormData) {
 
         revalidatePath('/admin');
         
-        // Optionally, generate recommendations for non-food orders
         if (type !== 'Food Order') {
             try {
                 const recommendations = await generateServiceRecommendations({
@@ -90,7 +90,7 @@ export async function submitServiceRequestAction(formData: FormData) {
                 return { success: true, recommendations: recommendations.recommendations };
             } catch (error) {
                 console.error("Error generating recommendations:", error);
-                return { success: true, recommendations: [] }; // Still success, even if recommendations fail
+                return { success: true, recommendations: [] }; 
             }
         }
 
@@ -112,10 +112,23 @@ export async function submitReplyAction(roomId: string, reply: string) {
             text: reply,
             timestamp: serverTimestamp()
         });
-        revalidatePath(`/service-request`); // To notify the user
+        revalidatePath(`/service-request`);
         revalidatePath('/admin');
         return { success: true, message: "Reply sent successfully." };
     } catch(e) {
         return { success: false, error: (e as Error).message };
+    }
+}
+
+export async function generateAdminReplyAction(guestMessage: string) {
+    if (!guestMessage) {
+        return { success: false, error: "Guest message is required." };
+    }
+    try {
+        const result = await generateAdminReply({ guestMessage });
+        return { success: true, response: result.suggestedReply };
+    } catch (error) {
+        console.error("AI Reply Generation Error:", error);
+        return { success: false, error: "Failed to generate AI reply." };
     }
 }

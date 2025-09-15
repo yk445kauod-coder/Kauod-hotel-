@@ -5,6 +5,7 @@
     "menu": "Food Menu",
     "services": "Requests & Services",
     "admin": "Admin Panel",
+    "about": "About",
     "toggle": "Toggle Menu"
   },
   "hotel": {
@@ -115,7 +116,22 @@
     "send_reply": "Send Reply",
     "no_requests": "No service requests found.",
     "reply_success_title": "Reply Sent",
-    "reply_success_desc": "Your reply has been successfully sent to the guest."
+    "reply_success_desc": "Your reply has been successfully sent to the guest.",
+    "guest_request": "Guest Request",
+    "ai_reply": "Generate AI Reply",
+    "notification_title": "New Service Request!",
+    "notification_body": "New request from room"
+  },
+  "about": {
+    "title": "About Kauod Hotel",
+    "description": "Learn more about our history, mission, and the team that makes your stay special.",
+    "privacy_policy": "Privacy Policy",
+    "password_prompt_title": "Admin Access",
+    "password_prompt_text": "Please enter the admin password to continue.",
+    "password_prompt_placeholder": "Password",
+    "password_prompt_confirm": "Confirm",
+    "password_prompt_cancel": "Cancel",
+    "incorrect_password": "Incorrect password."
   },
   "language": {
     "english": "English",
