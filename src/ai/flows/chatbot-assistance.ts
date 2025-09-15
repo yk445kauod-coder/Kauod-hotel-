@@ -25,24 +25,16 @@ export async function chatbotAssistance(input: ChatbotAssistanceInput): Promise<
   return chatbotAssistanceFlow(input);
 }
 
-const hotelInformationTool = ai.defineTool({
-  name: 'getHotelInformation',
-  description: 'Retrieves information about the hotel, including name, star rating, address, and contact information.',
-  inputSchema: z.object({}),
-  outputSchema: z.string(),
-},
-async () => {
-  //TODO: Implement retrieval of hotel information from a config file or database
-  return `Hotel Name: Kaoud Hotel, Star Rating: 5 stars, Address: Example Address, Contact: example@email.com`;
-});
-
-
 const prompt = ai.definePrompt({
   name: 'chatbotAssistancePrompt',
   input: {schema: ChatbotAssistanceInputSchema},
   output: {schema: ChatbotAssistanceOutputSchema},
-  tools: [hotelInformationTool],
-  prompt: `You are a chatbot assistant for the Kaoud Hotel. Use the available tools to answer guest questions accurately and concisely.\n
+  prompt: `You are a chatbot assistant for the Kaoud Hotel. 
+  
+  This is the hotel information: Hotel Name: Kaoud Hotel, Star Rating: 5 stars, Address: 123 Luxury Lane, Cairo, Egypt, Contact: reservations@kaoudhotel.com.
+  
+  Use this information to answer guest questions accurately and concisely.
+  
   User Query: {{{query}}}`,
 });
 
