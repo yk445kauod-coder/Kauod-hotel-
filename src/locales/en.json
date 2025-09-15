@@ -1,0 +1,81 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "chat": "Chat Assistant",
+    "menu": "Food Menu",
+    "services": "Service Request",
+    "admin": "Admin Panel",
+    "toggle": "Toggle navigation"
+  },
+  "footer": {
+    "name": "Hotel Name",
+    "rating": "Star Rating",
+    "address": "Address",
+    "contact": "Contact",
+    "rights": "All rights reserved."
+  },
+  "dashboard": {
+    "title": "Welcome to Kaoud Smart Assistant",
+    "subtitle": "Your one-stop portal for all hotel services. Select an option below to get started.",
+    "chat_card_title": "AI Assistant",
+    "chat_card_desc": "Ask questions and get instant help from our AI.",
+    "menu_card_title": "Food Menu",
+    "menu_card_desc": "Explore our delicious offerings.",
+    "services_card_title": "Request a Service",
+    "services_card_desc": "Need something? Let us know how we can help."
+  },
+  "chat": {
+    "title": "AI Chat Assistant",
+    "description": "I'm here to help with any questions you have about the hotel. What can I do for you?",
+    "placeholder": "Type your message here...",
+    "send": "Send"
+  },
+  "menu": {
+    "title": "Our Menu",
+    "description": "A selection of our finest dishes, drinks, and desserts.",
+    "print": "Print Menu"
+  },
+  "services": {
+    "title": "Request a Service",
+    "description": "Fill out the form below and our team will get back to you shortly.",
+    "form": {
+      "room_number": "Room Number",
+      "room_number_placeholder": "e.g., 302",
+      "name": "Full Name",
+      "name_placeholder": "Enter your full name",
+      "phone": "Phone Number",
+      "phone_placeholder": "Optional phone number",
+      "message": "Your Request",
+      "message_placeholder": "e.g., 'I need extra towels'",
+      "language": "Preferred Language",
+      "submit": "Submit Request"
+    },
+    "success_title": "Request Submitted!",
+    "success_desc": "Thank you! We have received your request and will attend to it shortly.",
+    "recommendations_title": "Personalized Recommendations",
+    "recommendations_desc": "Based on your request, you might also be interested in:"
+  },
+  "admin": {
+    "title": "Admin Panel",
+    "description": "Manage and respond to guest service requests.",
+    "table": {
+      "room": "Room",
+      "name": "Name",
+      "request": "Request",
+      "status": "Status",
+      "action": "Action"
+    },
+    "status_pending": "Pending",
+    "status_replied": "Replied",
+    "reply_button": "Reply",
+    "reply_dialog_title": "Reply to Guest",
+    "reply_dialog_desc": "Your response will be visible to the guest.",
+    "reply_placeholder": "Type your reply here...",
+    "send_reply": "Send Reply",
+    "no_requests": "No service requests found."
+  },
+  "language": {
+    "english": "English",
+    "arabic": "Arabic"
+  }
+}
