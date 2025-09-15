@@ -50,15 +50,6 @@ export function MainSidebar() {
             </Button>
           </Link>
         ))}
-         <Link href="/admin" passHref>
-            <Button
-              variant={pathname.startsWith('/admin') ? "secondary" : "ghost"}
-              className="w-full justify-start text-base py-6"
-            >
-                <Shield className="me-3 h-5 w-5" />
-                {t('nav.admin')}
-            </Button>
-          </Link>
       </nav>
     </div>
   );
