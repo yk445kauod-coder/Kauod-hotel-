@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Menu, Languages } from "lucide-react";
 import { MainSidebar } from "./main-sidebar";
 import { useLanguage } from "@/hooks/use-language";
@@ -27,6 +27,8 @@ export function Header() {
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="sm:max-w-xs">
+          <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+          <SheetDescription className="sr-only">Main navigation links for the application.</SheetDescription>
           <MainSidebar />
         </SheetContent>
       </Sheet>
