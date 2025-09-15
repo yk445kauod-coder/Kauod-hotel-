@@ -14,7 +14,7 @@ export default function MainLayout({
   children: React.ReactNode;
 }>) {
   const [isLanguageModalOpen, setLanguageModalOpen] = useState(false);
-  const { user } = useUser();
+  const { user, isDataGateOpen, setDataGateOpen } = useUser();
   const pathname = usePathname();
 
   useEffect(() => {
@@ -24,6 +24,13 @@ export default function MainLayout({
     }
   }, []);
 
+  useEffect(() => {
+    const protectedRoutes = ['/service-request', '/menu'];
+    if (!user.roomNumber && protectedRoutes.includes(pathname)) {
+        setDataGateOpen(true);
+    }
+  }, [pathname, user.roomNumber, setDataGateOpen]);
+
   const handleLanguageChange = (isOpen: boolean) => {
     if (!isOpen) {
       localStorage.setItem('language_selected', 'true');
@@ -31,8 +38,6 @@ export default function MainLayout({
     setLanguageModalOpen(isOpen);
   };
   
-  const showDataGate = !user.roomNumber && (pathname === '/service-request' || pathname === '/menu');
-
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
@@ -41,7 +46,7 @@ export default function MainLayout({
       </main>
       <Footer />
       <LanguageModal isOpen={isLanguageModalOpen} onOpenChange={handleLanguageChange} />
-      <DataGate />
+      <DataGate isOpen={isDataGateOpen} onOpenChange={setDataGateOpen} />
     </div>
   );
 }

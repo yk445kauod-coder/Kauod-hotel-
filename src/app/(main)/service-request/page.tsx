@@ -40,7 +40,7 @@ type Message = {
 export default function ServiceRequestPage() {
   const { language } = useLanguage();
   const { t } = useTranslation();
-  const { user, isDataGateOpen, setDataGateOpen } = useUser();
+  const { user } = useUser();
   const { toast } = useToast();
 
   const [messages, setMessages] = useState<Message[]>([]);
@@ -53,9 +53,6 @@ export default function ServiceRequestPage() {
 
   useEffect(() => {
     if (!user.roomNumber) {
-        if (!isDataGateOpen) {
-           setDataGateOpen(true);
-        }
         return;
     }
 
@@ -71,14 +68,18 @@ export default function ServiceRequestPage() {
     };
     
     const commentsListener = onChildAdded(commentsRef, (snapshot) => handleNewMessage(snapshot, 'user'));
-    const repliesListener = onChildAdded(repliesRef, (snapshot) => handleNewMessage(snapshot, 'admin'));
+    
+    // This is not a standard way to listen for replies. A reply is a child of a comment.
+    // Let's assume replies are stored at the room level for now based on previous code.
+    const roomRepliesRef = ref(db, `rooms/room_${user.roomNumber}/replies`);
+    const repliesListener = onChildAdded(roomRepliesRef, (snapshot) => handleNewMessage(snapshot, 'admin'));
 
     // Fetch initial messages
     onValue(commentsRef, (snapshot) => {
         const commentsData = snapshot.val() || {};
         const allComments = Object.entries(commentsData).map(([id, msg]: [string, any]) => ({ id, role: 'user' as const, ...msg }));
         
-        onValue(repliesRef, (snapshot) => {
+        onValue(roomRepliesRef, (snapshot) => {
             const repliesData = snapshot.val() || {};
             const allReplies = Object.entries(repliesData).map(([id, msg]: [string, any]) => ({ id, role: 'admin' as const, ...msg }));
 
@@ -91,10 +92,10 @@ export default function ServiceRequestPage() {
 
     return () => {
       off(commentsRef, 'child_added', commentsListener);
-      off(repliesRef, 'child_added', repliesListener);
+      off(roomRepliesRef, 'child_added', repliesListener);
     };
 
-  }, [user.roomNumber, isDataGateOpen, setDataGateOpen]);
+  }, [user.roomNumber]);
   
    useEffect(() => {
     if (scrollAreaRef.current) {
@@ -108,12 +109,12 @@ export default function ServiceRequestPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading || !user.roomNumber) return;
 
     setIsLoading(true);
 
     const formData = new FormData();
-    formData.append('roomNumber', user.roomNumber!);
+    formData.append('roomNumber', user.roomNumber);
     formData.append('guestName', user.name || 'Guest');
     formData.append('guestPhone', user.phone || 'N/A');
     formData.append('guestMessage', input);

@@ -8,8 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
-export function DataGate() {
-    const { isDataGateOpen, setDataGateOpen, setUser } = useUser();
+export function DataGate({ isOpen, onOpenChange }: { isOpen: boolean, onOpenChange: (isOpen: boolean) => void }) {
+    const { setUser } = useUser();
     const { t } = useTranslation();
     const [roomNumber, setRoomNumber] = useState("");
     const [name, setName] = useState("");
@@ -18,12 +18,16 @@ export function DataGate() {
     const handleSubmit = () => {
         if (roomNumber) {
             setUser({ roomNumber, name, phone });
-            setDataGateOpen(false);
+            onOpenChange(false);
+            // Clear local state after submission
+            setRoomNumber("");
+            setName("");
+            setPhone("");
         }
     };
 
     return (
-        <Dialog open={isDataGateOpen} onOpenChange={setDataGateOpen}>
+        <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[425px]" onInteractOutside={(e) => e.preventDefault()}>
                 <DialogHeader>
                     <DialogTitle>{t('data_gate.title')}</DialogTitle>

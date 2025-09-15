@@ -22,9 +22,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-
 
 const MenuItemRow = ({ item, onAddToCart }: { item: MenuItem, onAddToCart: (item: MenuItem) => void }) => {
   const { language } = useLanguage();
@@ -49,7 +46,7 @@ export default function MenuPage() {
   
   const [cart, setCart] = useState<Map<string, {item: MenuItem, quantity: number}>>(new Map());
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const { user, setUser, isDataGateOpen, setDataGateOpen } = useUser();
+  const { user, setDataGateOpen } = useUser();
   const [isLoading, setIsLoading] = useState(false);
 
 
@@ -140,6 +137,14 @@ export default function MenuPage() {
       document.body.removeChild(link);
     }
   };
+  
+  if (!user.roomNumber) {
+    return (
+        <div className="flex items-center justify-center h-[calc(100vh-200px)] text-muted-foreground">
+            <p>{t('services.enter_room_number_first')}</p>
+        </div>
+    );
+  }
 
 
   return (
