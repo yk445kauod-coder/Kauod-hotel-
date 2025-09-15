@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import LoadingLink from "@/components/layout/loading-link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
@@ -30,10 +30,10 @@ export function MainSidebar() {
   return (
     <div className="flex h-full flex-col">
       <div className="flex h-20 items-center border-b px-4 lg:px-6">
-        <Link href="/" className="flex items-center gap-3 font-semibold font-headline">
+        <LoadingLink href="/" className="flex items-center gap-3 font-semibold font-headline">
           <Image src="https://ik.imagekit.io/iz3ll61i9/IMG-20250718-WA0019.jpg" alt="Kaoud Hotel Logo" width={40} height={40} className="rounded-full" />
           <span className="text-lg">{t('hotel.name')}</span>
-        </Link>
+        </LoadingLink>
       </div>
       <nav className="flex flex-col gap-2 p-4">
         {navItems.map((item) => (
@@ -43,10 +43,10 @@ export function MainSidebar() {
               className="w-full justify-start text-base py-6"
               asChild
             >
-              <Link href={item.href}>
+              <LoadingLink href={item.href}>
                 <item.icon className="me-3 h-5 w-5" />
                 {t(item.label)}
-              </Link>
+              </LoadingLink>
             </Button>
         ))}
       </nav>

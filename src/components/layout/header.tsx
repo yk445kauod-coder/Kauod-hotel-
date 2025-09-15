@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import LoadingLink from "@/components/layout/loading-link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Languages, Menu } from "lucide-react";
@@ -36,16 +36,16 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/90 backdrop-blur-sm">
       <div className="container mx-auto flex h-20 items-center justify-between">
-        <Link href="/" className="flex items-center gap-3">
+        <LoadingLink href="/" className="flex items-center gap-3">
           <Image src="https://ik.imagekit.io/iz3ll61i9/IMG-20250718-WA0019.jpg" alt="Kaoud Hotel Logo" width={50} height={50} className="rounded-full" />
           <span className="text-xl font-bold font-headline text-primary">فندق قاعود</span>
-        </Link>
+        </LoadingLink>
         
         <nav className="hidden md:flex items-center gap-6">
           {navItems.map((item) => (
-            <Link href={item.href} key={item.href} className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+            <LoadingLink href={item.href} key={item.href} className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
               {t(item.label)}
-            </Link>
+            </LoadingLink>
           ))}
         </nav>
 

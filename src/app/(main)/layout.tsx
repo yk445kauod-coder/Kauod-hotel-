@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Header } from "@/components/layout/header";
@@ -25,11 +26,13 @@ export default function MainLayout({
   }, []);
 
   useEffect(() => {
+    if (isDataGateOpen) return; // Don't check for protected routes if the gate is already open
+
     const protectedRoutes = ['/service-request', '/menu'];
     if (!user.roomNumber && protectedRoutes.includes(pathname)) {
         setDataGateOpen(true);
     }
-  }, [pathname, user.roomNumber, setDataGateOpen]);
+  }, [pathname, user.roomNumber, setDataGateOpen, isDataGateOpen]);
 
   const handleLanguageChange = (isOpen: boolean) => {
     if (!isOpen) {

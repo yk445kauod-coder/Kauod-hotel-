@@ -3,7 +3,9 @@ import { LanguageProvider } from '@/context/language-context';
 import { UserProvider } from '@/context/user-context';
 import { Toaster } from '@/components/ui/toaster';
 import './globals.css';
-import { Analytics } from "@vercel/analytics/react"
+import { Analytics } from "@vercel/analytics/react";
+import { LoaderProvider } from '@/context/loader-context';
+import { PageLoader } from '@/components/layout/page-loader';
 
 export const metadata: Metadata = {
   title: 'فندق قاعود | Kaoud Hotel',
@@ -28,13 +30,16 @@ export default function RootLayout({
 
       </head>
       <body className="font-body antialiased">
-        <LanguageProvider>
-          <UserProvider>
-            {children}
-            <Toaster />
-            <Analytics />
-          </UserProvider>
-        </LanguageProvider>
+        <LoaderProvider>
+          <LanguageProvider>
+            <UserProvider>
+              <PageLoader />
+              {children}
+              <Toaster />
+              <Analytics />
+            </UserProvider>
+          </LanguageProvider>
+        </LoaderProvider>
       </body>
     </html>
   );

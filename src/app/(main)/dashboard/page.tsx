@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import LoadingLink from "@/components/layout/loading-link";
 import Image from "next/image";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -53,7 +53,7 @@ export default function DashboardPage() {
           <h1 className="text-4xl md:text-6xl font-bold font-headline tracking-tight text-gold">{t('hotel.name')}</h1>
           <p className="mt-4 max-w-2xl text-lg md:text-xl text-light-gold">{t('hotel.description')}</p>
           <Button asChild size="lg" className="mt-8 bg-gold text-dark-brown hover:bg-light-gold">
-            <Link href="/service-request">{t('dashboard.book_now')}</Link>
+            <LoadingLink href="/service-request">{t('dashboard.book_now')}</LoadingLink>
           </Button>
         </div>
       </section>
@@ -77,7 +77,7 @@ export default function DashboardPage() {
                   <CardContent>
                     <CardDescription>{t(feature.descriptionKey)}</CardDescription>
                     <Button asChild variant="link" className="mt-4 text-primary">
-                       <Link href={feature.href}>{t('dashboard.learn_more')}</Link>
+                       <LoadingLink href={feature.href}>{t('dashboard.learn_more')}</LoadingLink>
                     </Button>
                   </CardContent>
                 </Card>
