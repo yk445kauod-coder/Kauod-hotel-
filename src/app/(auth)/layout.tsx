@@ -1,14 +1,11 @@
-
 "use client";
 
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
 import { LanguageModal } from "@/components/layout/language-modal";
-import { useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
 import { useUser } from "@/context/user-context";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
-export default function MainLayout({
+export default function AuthLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -26,8 +23,8 @@ export default function MainLayout({
   }, []);
   
   useEffect(() => {
-    if (!isLoading && !user.roomNumber) {
-        router.push('/login');
+    if (!isLoading && user.roomNumber && pathname === '/login') {
+        router.push('/dashboard');
     }
   }, [user, isLoading, router, pathname]);
 
@@ -38,18 +35,14 @@ export default function MainLayout({
     setLanguageModalOpen(isOpen);
   };
   
-  if (isLoading || !user.roomNumber) {
+  if (isLoading) {
     return null; // Or a loading spinner
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <Header />
-      <main className="flex-1">
-        {children}
-      </main>
-      <Footer />
+    <>
+      {children}
       <LanguageModal isOpen={isLanguageModalOpen} onOpenChange={handleLanguageChange} />
-    </div>
+    </>
   );
 }

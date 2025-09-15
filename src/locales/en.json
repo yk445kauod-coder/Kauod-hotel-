@@ -140,8 +140,11 @@
   "currency": "EGP",
   "loading": "Loading...",
   "data_gate": {
-    "title": "Guest Information",
+    "title": "Welcome to Kaoud Hotel",
     "description": "Please enter your details to continue. You will only need to do this once.",
-    "submit": "Save & Continue"
+    "submit": "Login",
+    "room": "Room",
+    "edit_data": "Edit Data",
+    "logout": "Logout"
   }
 }

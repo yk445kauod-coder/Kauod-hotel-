@@ -141,14 +141,6 @@ export default function ServiceRequestPage() {
     });
   }
 
-  if (!user.roomNumber) {
-    return (
-        <div className="flex items-center justify-center h-[calc(100vh-200px)] text-muted-foreground">
-            <p>{t('services.enter_room_number_first')}</p>
-        </div>
-    );
-  }
-
   return (
     <div className="font-body bg-cream" dir={language === 'ar' ? 'rtl' : 'ltr'}>
         <div className="container mx-auto p-0 md:p-4 h-[calc(100vh-100px)] flex flex-col">

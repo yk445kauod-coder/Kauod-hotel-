@@ -46,7 +46,7 @@ export default function MenuPage() {
   
   const [cart, setCart] = useState<Map<string, {item: MenuItem, quantity: number}>>(new Map());
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const { user, setDataGateOpen } = useUser();
+  const { user } = useUser();
   const [isLoading, setIsLoading] = useState(false);
 
 
@@ -79,7 +79,8 @@ export default function MenuPage() {
   
   const handleCheckout = async () => {
     if (!user.roomNumber) {
-        setDataGateOpen(true);
+        // This should not happen due to the layout redirect, but as a fallback
+        toast({ title: t('services.error_title'), description: t('services.enter_room_number_first'), variant: 'destructive' });
         return;
     }
     
@@ -137,15 +138,6 @@ export default function MenuPage() {
       document.body.removeChild(link);
     }
   };
-  
-  if (!user.roomNumber) {
-    return (
-        <div className="flex items-center justify-center h-[calc(100vh-200px)] text-muted-foreground">
-            <p>{t('services.enter_room_number_first')}</p>
-        </div>
-    );
-  }
-
 
   return (
     <div className="bg-gradient-to-br from-cream to-[#f5f1e6] py-10 px-4 print-container" dir={language === 'ar' ? 'rtl' : 'ltr'}>
@@ -212,7 +204,7 @@ export default function MenuPage() {
             {menuData.map((category) => (
             <section key={category.id} className="mb-12">
                 <div className="relative h-64 w-full rounded-lg overflow-hidden mb-6 shadow-lg border border-gold">
-                    <Image src={category.image} alt={language === 'ar' ? category.name : category.en_name} layout="fill" objectFit="cover" className="transform transition-transform duration-500 hover:scale-105" />
+                    <Image src={category.image} alt={language === 'ar' ? category.name : category.en_name} fill objectFit="cover" className="transform transition-transform duration-500 hover:scale-105" />
                 </div>
                 <h2 className="bg-gradient-to-r from-primary to-accent text-white text-3xl font-headline p-4 rounded-lg text-center mb-6 border-2 border-gold shadow-md">{language === 'ar' ? category.name : category.en_name}</h2>
 

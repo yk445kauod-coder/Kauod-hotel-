@@ -3,7 +3,7 @@
 import LoadingLink from "@/components/layout/loading-link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Languages, Menu } from "lucide-react";
+import { Languages, Menu, LogOut, User } from "lucide-react";
 import { useLanguage } from "@/hooks/use-language";
 import { useTranslation } from "@/hooks/use-translation";
 import {
@@ -11,6 +11,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
   Sheet,
@@ -20,10 +21,12 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { MainSidebar } from "./main-sidebar";
+import { useUser } from "@/context/user-context";
 
 export function Header() {
   const { language, setLanguage } = useLanguage();
   const { t } = useTranslation();
+  const { user, logout, isDataGateOpen, setDataGateOpen } = useUser();
 
   const navItems = [
     { href: "/dashboard", label: "nav.dashboard" },
@@ -32,6 +35,10 @@ export function Header() {
     { href: "/chat", label: "nav.chat" },
     { href: "/about", label: "nav.about" },
   ];
+  
+  const handleLogout = () => {
+    logout();
+  }
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/90 backdrop-blur-sm">
@@ -66,6 +73,31 @@ export function Header() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+
+           {user?.roomNumber && (
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                        <User className="h-5 w-5" />
+                        <span className="sr-only">User Menu</span>
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuItem disabled>
+                       {t('data_gate.room')}: {user.roomNumber}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setDataGateOpen(true)}>
+                        <User className="me-2" />
+                        {t('data_gate.edit_data')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleLogout}>
+                        <LogOut className="me-2" />
+                        {t('data_gate.logout')}
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+           )}
 
           <div className="md:hidden">
             <Sheet>

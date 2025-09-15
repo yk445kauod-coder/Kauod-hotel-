@@ -6,31 +6,35 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export function DataGate({ isOpen, onOpenChange }: { isOpen: boolean, onOpenChange: (isOpen: boolean) => void }) {
-    const { setUser } = useUser();
+    const { user, setUser } = useUser();
     const { t } = useTranslation();
     const [roomNumber, setRoomNumber] = useState("");
     const [name, setName] = useState("");
     const [phone, setPhone] = useState("");
+    
+    useEffect(() => {
+        if(isOpen) {
+            setRoomNumber(user.roomNumber || "");
+            setName(user.name || "");
+            setPhone(user.phone || "");
+        }
+    }, [isOpen, user]);
 
     const handleSubmit = () => {
         if (roomNumber) {
             setUser({ roomNumber, name, phone });
             onOpenChange(false);
-            // Clear local state after submission
-            setRoomNumber("");
-            setName("");
-            setPhone("");
         }
     };
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[425px]" onInteractOutside={(e) => e.preventDefault()}>
+            <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>{t('data_gate.title')}</DialogTitle>
+                    <DialogTitle>{t('data_gate.edit_data')}</DialogTitle>
                     <DialogDescription>{t('data_gate.description')}</DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
