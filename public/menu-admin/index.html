@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة طلبات الطعام - فندق قاعود</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1><i class="fas fa-concierge-bell"></i> إدارة طلبات الطعام</h1>
+    </header>
+
+    <main class="container">
+        <!-- قسم عرض الطلبات الواردة -->
+        <section id="orders-reception">
+            <h2><i class="fas fa-inbox"></i> الطلبات الواردة</h2>
+            <div id="orders-list" class="orders-list">
+                <!-- سيتم ملء الطلبات هنا عبر JavaScript -->
+                <div class="no-orders">
+                    <i class="fas fa-hourglass-half"></i>
+                    <p>في انتظار وصول طلبات جديدة...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- قسم قائمة الطعام للعرض فقط -->
+        <section id="menu-display">
+            <h2><i class="fas fa-utensils"></i> قائمة الطعام الكاملة</h2>
+            <div id="full-menu" class="full-menu-grid">
+                <!-- سيتم عرض فئات المنيو هنا -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal لعرض تفاصيل الطلب والرد -->
+    <div id="order-details-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <div id="modal-body">
+                <!-- تفاصيل الطلب ستظهر هنا -->
+            </div>
+            <div class="reply-section">
+                <h3><i class="fas fa-reply"></i> الرد على النزيل</h3>
+                <textarea id="reply-message" placeholder="اكتب ردك هنا (مثال: طلبك قيد التحضير وسيصل خلال 20 دقيقة)"></textarea>
+                <button id="send-reply-btn">إرسال الرد</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Firebase SDK and custom script -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
