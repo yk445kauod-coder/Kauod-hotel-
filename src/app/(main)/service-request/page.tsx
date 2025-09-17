@@ -5,7 +5,7 @@ import { useLanguage } from '@/hooks/use-language';
 import { useTranslation } from '@/hooks/use-translation';
 import { useUser } from '@/context/user-context';
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref, onChildAdded, serverTimestamp, push, onValue, off } from "firebase/database";
+import { getDatabase, ref, onChildAdded, serverTimestamp, push, off, get, child } from "firebase/database";
 import { Star, Send, Loader2, Bot, User as UserIcon } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
@@ -49,50 +49,53 @@ export default function ServiceRequestPage() {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
 
   useEffect(() => {
     if (!user.roomNumber) {
         return;
     }
+    
+    setIsInitialLoad(true);
+    const roomRef = ref(db, `rooms/room_${user.roomNumber}`);
+    const commentsRef = child(roomRef, 'comments');
+    const repliesRef = child(roomRef, 'replies');
 
-    const commentsRef = ref(db, `rooms/room_${user.roomNumber}/comments`);
-    const repliesRef = ref(db, `rooms/room_${user.roomNumber}/replies`);
+    let initialMessages: Message[] = [];
 
+    // 1. Fetch initial data
+    get(roomRef).then(snapshot => {
+      if (snapshot.exists()) {
+        const roomData = snapshot.val();
+        const comments = roomData.comments || {};
+        const replies = roomData.replies || {};
+
+        const allComments = Object.entries(comments).map(([id, msg]: [string, any]) => ({ id, role: 'user' as const, ...msg }));
+        const allReplies = Object.entries(replies).map(([id, msg]: [string, any]) => ({ id, role: 'admin' as const, ...msg }));
+
+        initialMessages = [...allComments, ...allReplies].sort((a, b) => a.timestamp - b.timestamp);
+        setMessages(initialMessages);
+      }
+      setIsInitialLoad(false);
+    });
+
+    // 2. Set up listeners for new messages
     const handleNewMessage = (snapshot: any, role: 'user' | 'admin') => {
         const data = snapshot.val();
         setMessages(prev => {
             if (prev.some(m => m.id === snapshot.key)) return prev;
-            return [...prev, { id: snapshot.key!, role, ...data }];
+            return [...prev, { id: snapshot.key!, role, ...data }].sort((a, b) => a.timestamp - b.timestamp);
         });
     };
-    
+
     const commentsListener = onChildAdded(commentsRef, (snapshot) => handleNewMessage(snapshot, 'user'));
-    
-    // This is not a standard way to listen for replies. A reply is a child of a comment.
-    // Let's assume replies are stored at the room level for now based on previous code.
-    const roomRepliesRef = ref(db, `rooms/room_${user.roomNumber}/replies`);
-    const repliesListener = onChildAdded(roomRepliesRef, (snapshot) => handleNewMessage(snapshot, 'admin'));
+    const repliesListener = onChildAdded(repliesRef, (snapshot) => handleNewMessage(snapshot, 'admin'));
 
-    // Fetch initial messages
-    onValue(commentsRef, (snapshot) => {
-        const commentsData = snapshot.val() || {};
-        const allComments = Object.entries(commentsData).map(([id, msg]: [string, any]) => ({ id, role: 'user' as const, ...msg }));
-        
-        onValue(roomRepliesRef, (snapshot) => {
-            const repliesData = snapshot.val() || {};
-            const allReplies = Object.entries(repliesData).map(([id, msg]: [string, any]) => ({ id, role: 'admin' as const, ...msg }));
-
-            const combined = [...allComments, ...allReplies].sort((a, b) => a.timestamp - b.timestamp);
-            setMessages(combined);
-        }, { onlyOnce: true });
-
-    }, { onlyOnce: true });
-
-
+    // 3. Cleanup listeners on unmount
     return () => {
       off(commentsRef, 'child_added', commentsListener);
-      off(roomRepliesRef, 'child_added', repliesListener);
+      off(repliesRef, 'child_added', repliesListener);
     };
 
   }, [user.roomNumber]);
@@ -150,33 +153,39 @@ export default function ServiceRequestPage() {
                </header>
                
                <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
-                 <div className="space-y-6">
-                    {messages.map((message) => (
-                         <div key={message.id} className={`flex items-end gap-3 ${ message.role === 'user' ? 'justify-end' : '' }`}>
-                            {message.role === 'admin' && (
-                                <Avatar className="h-8 w-8">
-                                    <AvatarFallback><Bot /></AvatarFallback>
-                                </Avatar>
-                            )}
-                            <div className={`max-w-md rounded-lg p-3 text-sm ${ message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted' }`}>
-                                 <p style={{ whiteSpace: "pre-wrap" }}>{message.text}</p>
-                                 {message.rating && (
-                                     <div className="flex items-center mt-2">
-                                        {[...Array(5)].map((_, i) => (
-                                             <Star key={i} className={`w-4 h-4 ${i < message.rating! ? 'text-gold fill-gold' : 'text-gray-300' }`} />
-                                        ))}
-                                    </div>
-                                 )}
-                                 <p className="text-xs text-right mt-1 opacity-70">{formatTimestamp(message.timestamp)}</p>
-                            </div>
-                            {message.role === 'user' && (
-                                <Avatar className="h-8 w-8">
-                                    <AvatarFallback><UserIcon /></AvatarFallback>
-                                </Avatar>
-                            )}
-                         </div>
-                    ))}
-                 </div>
+                 {isInitialLoad ? (
+                    <div className="flex justify-center items-center h-full">
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                        {messages.map((message) => (
+                             <div key={message.id} className={`flex items-end gap-3 ${ message.role === 'user' ? 'justify-end' : '' }`}>
+                                {message.role === 'admin' && (
+                                    <Avatar className="h-8 w-8">
+                                        <AvatarFallback><Bot /></AvatarFallback>
+                                    </Avatar>
+                                )}
+                                <div className={`max-w-md rounded-lg p-3 text-sm ${ message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted' }`}>
+                                     <p style={{ whiteSpace: "pre-wrap" }}>{message.text}</p>
+                                     {message.rating && (
+                                         <div className="flex items-center mt-2">
+                                            {[...Array(5)].map((_, i) => (
+                                                 <Star key={i} className={`w-4 h-4 ${i < message.rating! ? 'text-gold fill-gold' : 'text-gray-300' }`} />
+                                            ))}
+                                        </div>
+                                     )}
+                                     <p className="text-xs text-right mt-1 opacity-70">{formatTimestamp(message.timestamp)}</p>
+                                </div>
+                                {message.role === 'user' && (
+                                    <Avatar className="h-8 w-8">
+                                        <AvatarFallback><UserIcon /></AvatarFallback>
+                                    </Avatar>
+                                )}
+                             </div>
+                        ))}
+                    </div>
+                 )}
                </ScrollArea>
                
                <footer className="p-4 border-t bg-gray-50">
