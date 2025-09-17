@@ -4,103 +4,88 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة تحكم فندق قاعود</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="login-overlay">
-        <div id="login-modal">
+        <div id="login-box">
             <h2>تسجيل دخول المشرف</h2>
-            <p>الرجاء إدخال كلمة المرور للوصول إلى لوحة التحكم.</p>
-            <input type="password" id="password-input" placeholder="كلمة المرور">
-            <button id="login-btn">دخول</button>
-            <p id="login-error"></p>
+            <input type="password" id="password" placeholder="كلمة المرور">
+            <button id="login-button">دخول</button>
+            <p id="login-error" class="error-message"></p>
         </div>
     </div>
 
     <div id="admin-panel" class="hidden">
         <aside id="sidebar">
             <div class="sidebar-header">
-                <i class="fas fa-hotel"></i>
-                <h1>فندق قاعود</h1>
+                <h3><i class="fas fa-hotel"></i> فندق قاعود</h3>
             </div>
             <nav>
-                <ul>
-                    <li><a href="#" class="nav-link active" data-target="dashboard-section"><i class="fas fa-tachometer-alt"></i><span>الرئيسية</span></a></li>
-                    <li><a href="#" class="nav-link" data-target="rooms-section"><i class="fas fa-door-open"></i><span>إدارة الغرف</span></a></li>
-                    <li><a href="#" class="nav-link" data-target="messages-section"><i class="fas fa-comments"></i><span>الرسائل</span></a></li>
-                    <li><a href="#" class="nav-link" data-target="orders-section"><i class="fas fa-utensils"></i><span>طلبات الطعام</span></a></li>
-                </ul>
+                <a href="#dashboard-section" class="nav-link active"><i class="fas fa-tachometer-alt"></i> الرئيسية</a>
+                <a href="#rooms-section" class="nav-link"><i class="fas fa-door-open"></i> الغرف</a>
+                <a href="#messages-section" class="nav-link"><i class="fas fa-envelope"></i> الرسائل</a>
+                <a href="#orders-section" class="nav-link"><i class="fas fa-utensils"></i> طلبات الطعام</a>
             </nav>
             <div class="sidebar-footer">
-                <button id="logout-btn"><i class="fas fa-sign-out-alt"></i><span>تسجيل الخروج</span></button>
+                <button id="logout-button"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</button>
             </div>
         </aside>
 
         <main id="main-content">
             <header>
-                <button id="menu-toggle"><i class="fas fa-bars"></i></button>
-                <h2>لوحة التحكم الرئيسية</h2>
-                <div id="notification-bell">
+                <h1>لوحة التحكم الرئيسية</h1>
+                <div id="notifications">
                     <i class="fas fa-bell"></i>
-                    <span id="notification-count" class="hidden">0</span>
+                    <span id="notification-count">0</span>
+                    <div id="notification-dropdown" class="hidden"></div>
                 </div>
             </header>
 
-            <section id="dashboard-section" class="content-section active">
-                <div class="stats-grid">
+            <!-- Dashboard Section -->
+            <section id="dashboard-section" class="page-section">
+                <h2>نظرة عامة</h2>
+                <div class="stats-cards">
                     <div class="stat-card">
-                        <i class="fas fa-door-open"></i>
-                        <div>
-                            <p>الغرف المشغولة</p>
-                            <h3 id="occupied-rooms-count">0</h3>
-                        </div>
+                        <h4><i class="fas fa-door-open"></i> الغرف المشغولة</h4>
+                        <p id="occupied-rooms-count">0</p>
                     </div>
                     <div class="stat-card">
-                        <i class="fas fa-concierge-bell"></i>
-                        <div>
-                            <p>طلبات الخدمة</p>
-                            <h3 id="service-requests-count">0</h3>
-                        </div>
+                        <h4><i class="fas fa-envelope"></i> رسائل جديدة</h4>
+                        <p id="new-messages-count">0</p>
                     </div>
                     <div class="stat-card">
-                        <i class="fas fa-utensils"></i>
-                        <div>
-                            <p>طلبات الطعام</p>
-                            <h3 id="food-orders-count">0</h3>
-                        </div>
+                        <h4><i class="fas fa-utensils"></i> طلبات جديدة</h4>
+                        <p id="new-orders-count">0</p>
                     </div>
-                     <div class="stat-card">
-                        <i class="fas fa-star"></i>
-                        <div>
-                            <p>متوسط التقييم</p>
-                            <h3 id="average-rating">0</h3>
-                        </div>
+                    <div class="stat-card">
+                        <h4><i class="fas fa-star"></i> متوسط التقييم</h4>
+                        <p id="average-rating">0.0</p>
                     </div>
                 </div>
-                <!-- More dashboard content here -->
             </section>
-            
-            <section id="rooms-section" class="content-section">
+
+            <!-- Rooms Section -->
+            <section id="rooms-section" class="page-section hidden">
                 <h2>إدارة الغرف</h2>
-                <div id="rooms-container" class="rooms-grid">
+                <div id="rooms-grid">
                     <!-- Room cards will be inserted here by JS -->
                 </div>
             </section>
 
-            <section id="messages-section" class="content-section">
-                 <h2>رسائل النزلاء</h2>
-                 <div id="messages-container" class="items-list">
+            <!-- Messages Section -->
+            <section id="messages-section" class="page-section hidden">
+                <h2>صندوق الرسائل والطلبات</h2>
+                <div id="messages-list">
                     <!-- Messages will be inserted here by JS -->
-                 </div>
+                </div>
             </section>
 
-            <section id="orders-section" class="content-section">
+            <!-- Orders Section -->
+            <section id="orders-section" class="page-section hidden">
                 <h2>طلبات الطعام</h2>
-                <div id="orders-container" class="items-list">
+                <div id="orders-list">
                     <!-- Food orders will be inserted here by JS -->
                 </div>
             </section>
@@ -110,9 +95,15 @@
     <!-- Modal for details and replies -->
     <div id="details-modal" class="modal-overlay hidden">
         <div class="modal-content">
-            <button class="close-modal-btn"><i class="fas fa-times"></i></button>
+            <button class="modal-close-btn">&times;</button>
+            <h3 id="modal-title">تفاصيل الطلب</h3>
             <div id="modal-body">
-                <!-- Modal content will be loaded by JS -->
+                <!-- Content will be injected by JS -->
+            </div>
+            <div id="modal-reply-section">
+                <h4>إرسال رد للغرفة</h4>
+                <textarea id="reply-textarea" placeholder="اكتب ردك هنا..."></textarea>
+                <button id="send-reply-button">إرسال الرد</button>
             </div>
         </div>
     </div>

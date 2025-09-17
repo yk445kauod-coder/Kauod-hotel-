@@ -1,4 +1,5 @@
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', () => {
+
     // --- Firebase Configuration ---
     const firebaseConfig = {
         apiKey: "AIzaSyApgrwfyrVJYsihy9tUwPfazdNYZPqWbow",
@@ -11,33 +12,31 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     // --- Initialize Firebase ---
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
     const db = firebase.database();
 
     // --- DOM Elements ---
     const loginOverlay = document.getElementById('login-overlay');
-    const loginBtn = document.getElementById('login-btn');
-    const passwordInput = document.getElementById('password-input');
-    const loginError = document.getElementById('login-error');
     const adminPanel = document.getElementById('admin-panel');
-    const menuToggle = document.getElementById('menu-toggle');
-    const sidebar = document.getElementById('sidebar');
-    const mainContent = document.getElementById('main-content');
+    const loginButton = document.getElementById('login-button');
+    const passwordInput = document.getElementById('password');
+    const loginError = document.getElementById('login-error');
+    const logoutButton = document.getElementById('logout-button');
     const navLinks = document.querySelectorAll('.nav-link');
-    const contentSections = document.querySelectorAll('.content-section');
-    const logoutBtn = document.getElementById('logout-btn');
-    
-    const roomsContainer = document.getElementById('rooms-container');
-    const messagesContainer = document.getElementById('messages-container');
-    const ordersContainer = document.getElementById('orders-container');
-
-    const detailsModal = document.getElementById('details-modal');
-    const closeModalBtn = detailsModal.querySelector('.close-modal-btn');
+    const sections = document.querySelectorAll('.page-section');
+    const modalOverlay = document.getElementById('details-modal');
+    const modalCloseBtn = document.querySelector('.modal-close-btn');
+    const modalTitle = document.getElementById('modal-title');
     const modalBody = document.getElementById('modal-body');
+    const sendReplyBtn = document.getElementById('send-reply-button');
+    const replyTextarea = document.getElementById('reply-textarea');
+
+    // --- State ---
+    let currentRoomId = null;
 
     // --- Authentication ---
-    const correctPassword = "admin"; // Simple password, replace with a secure method if needed
-
     function checkAuth() {
         if (sessionStorage.getItem('isAdminAuthenticated') === 'true') {
             loginOverlay.classList.add('hidden');
@@ -49,334 +48,314 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    loginBtn.addEventListener('click', () => {
-        if (passwordInput.value === correctPassword) {
+    loginButton.addEventListener('click', () => {
+        if (passwordInput.value === 'admin123') {
             sessionStorage.setItem('isAdminAuthenticated', 'true');
             checkAuth();
         } else {
             loginError.textContent = 'كلمة المرور غير صحيحة.';
-            passwordInput.style.border = '1px solid red';
-        }
-    });
-    
-    passwordInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            loginBtn.click();
+            setTimeout(() => loginError.textContent = '', 3000);
         }
     });
 
-    logoutBtn.addEventListener('click', () => {
+    logoutButton.addEventListener('click', () => {
         sessionStorage.removeItem('isAdminAuthenticated');
         checkAuth();
+        location.reload();
     });
 
-
-    // --- UI Interactions ---
-    menuToggle.addEventListener('click', () => {
-        sidebar.classList.toggle('collapsed');
-        mainContent.classList.toggle('collapsed');
-    });
-
+    // --- Navigation ---
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
-            const targetId = link.getAttribute('data-target');
+            const targetId = link.getAttribute('href').substring(1);
 
-            navLinks.forEach(l => l.classList.remove('active'));
-            link.classList.add('active');
-
-            contentSections.forEach(section => {
-                if (section.id === targetId) {
-                    section.classList.add('active');
-                } else {
-                    section.classList.remove('active');
-                }
+            sections.forEach(section => {
+                section.classList.add('hidden');
             });
+            document.getElementById(targetId).classList.remove('hidden');
+
+            navLinks.forEach(nav => nav.classList.remove('active'));
+            link.classList.add('active');
         });
     });
 
-    closeModalBtn.addEventListener('click', () => detailsModal.classList.add('hidden'));
-    detailsModal.addEventListener('click', (e) => {
-        if (e.target === detailsModal) {
-            detailsModal.classList.add('hidden');
-        }
-    });
-
-    // --- Firebase Data Loading ---
+    // --- Data Loading & Real-time Updates ---
     function loadInitialData() {
         const roomsRef = db.ref('rooms');
-        
-        roomsRef.on('value', (snapshot) => {
-            const roomsData = snapshot.val();
-            if (roomsData) {
-                renderRooms(roomsData);
-                renderMessagesAndOrders(roomsData);
-                updateDashboardStats(roomsData);
-            } else {
-                 roomsContainer.innerHTML = '<p>لا توجد غرف لعرضها.</p>';
-                 messagesContainer.innerHTML = '<p>لا توجد رسائل لعرضها.</p>';
-                 ordersContainer.innerHTML = '<p>لا توجد طلبات لعرضها.</p>';
-            }
+        roomsRef.on('value', snapshot => {
+            const roomsData = snapshot.val() || {};
+            updateDashboard(roomsData);
+            updateRoomsGrid(roomsData);
+            updateMessagesList(roomsData);
+            updateOrdersList(roomsData);
         });
     }
 
-    function renderRooms(rooms) {
-        roomsContainer.innerHTML = '';
-        Object.keys(rooms).forEach(roomId => {
-            const roomData = rooms[roomId];
-            const roomNumber = roomId.replace('room_', '');
-            
-            const comments = roomData.comments ? Object.values(roomData.comments) : [];
-            const orders = roomData.orders ? Object.values(roomData.orders) : [];
-
-            const card = document.createElement('div');
-            card.className = 'room-card';
-            card.dataset.status = 'مشغولة'; // Default status
-
-            card.innerHTML = `
-                <div class="room-card-header">
-                    <h3>غرفة ${roomNumber}</h3>
-                    <span class="status">مشغولة</span>
-                </div>
-                <div class="room-card-body">
-                    <p>طلبات الخدمة: <strong>${comments.length}</strong></p>
-                    <p>طلبات الطعام: <strong>${orders.length}</strong></p>
-                    <p>آخر نشاط: <strong>${formatTimestamp(findLastActivity(roomData))}</strong></p>
-                </div>
-                <div class="room-card-actions">
-                    <button class="action-btn view-details-btn" data-room-id="${roomId}">عرض التفاصيل</button>
-                </div>
-            `;
-            roomsContainer.appendChild(card);
-        });
-
-        document.querySelectorAll('.view-details-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const roomId = btn.dataset.roomId;
-                showRoomDetails(roomId, rooms[roomId]);
-            });
-        });
-    }
-    
-    function renderMessagesAndOrders(rooms) {
-        messagesContainer.innerHTML = '';
-        ordersContainer.innerHTML = '';
-        
-        const allMessages = [];
-        const allOrders = [];
-
-        Object.keys(rooms).forEach(roomId => {
-            const roomData = rooms[roomId];
-            const roomNumber = roomId.replace('room_', '');
-
-            if (roomData.comments) {
-                Object.values(roomData.comments).forEach(comment => {
-                    allMessages.push({ ...comment, roomNumber, roomId, type: 'comment' });
-                });
-            }
-             if (roomData.replies) {
-                Object.values(roomData.replies).forEach(reply => {
-                    allMessages.push({ ...reply, roomNumber, roomId, type: 'reply' });
-                });
-            }
-            if (roomData.orders) {
-                Object.values(roomData.orders).forEach(order => {
-                    allOrders.push({ ...order, roomNumber, roomId });
-                });
-            }
-        });
-        
-        // Sort by timestamp descending
-        allMessages.sort((a,b) => b.timestamp - a.timestamp);
-        allOrders.sort((a,b) => b.timestamp - a.timestamp);
-        
-        if (allMessages.length === 0) {
-            messagesContainer.innerHTML = '<p>لا توجد رسائل لعرضها.</p>';
-        } else {
-             allMessages.forEach(msg => {
-                const itemCard = createItemCard(msg);
-                messagesContainer.appendChild(itemCard);
-            });
-        }
-        
-        if (allOrders.length === 0) {
-             ordersContainer.innerHTML = '<p>لا توجد طلبات طعام لعرضها.</p>';
-        } else {
-             allOrders.forEach(order => {
-                const itemCard = createItemCard(order);
-                ordersContainer.appendChild(itemCard);
-            });
-        }
-    }
-
-    function createItemCard(item) {
-        const card = document.createElement('div');
-        card.className = 'item-card';
-
-        let content = '';
-        if (item.type === 'comment' || item.type === 'reply') { // Message
-             content = `
-                <div class="info">
-                    <h4>${item.type === 'comment' ? 'رسالة من' : 'رد إلى'} غرفة ${item.roomNumber}</h4>
-                    <p>${item.text}</p>
-                </div>
-                <div class="meta">
-                    <span>${formatTimestamp(item.timestamp)}</span>
-                    ${item.rating ? `<span>التقييم: ${'★'.repeat(item.rating)}</span>` : ''}
-                </div>
-            `;
-        } else { // Order
-            const itemsCount = item.items.reduce((sum, current) => sum + current.quantity, 0);
-             content = `
-                <div class="info">
-                    <h4>طلب طعام من غرفة ${item.roomNumber}</h4>
-                    <p>الاسم: ${item.guestName || 'غير مسجل'}</p>
-                </div>
-                <div class="meta">
-                    <span>${formatTimestamp(item.timestamp)}</span>
-                    <span>الأصناف: ${itemsCount}</span>
-                    <span>الإجمالي: ${item.total.toFixed(2)} ج.م</span>
-                </div>
-            `;
-        }
-        
-        card.innerHTML = `${content}
-            <div class="actions">
-                <button class="action-btn view-details-btn" data-room-id="${item.roomId}">عرض المحادثة</button>
-            </div>
-        `;
-        
-        card.querySelector('.view-details-btn').addEventListener('click', () => {
-            db.ref('rooms/' + item.roomId).once('value', (snapshot) => {
-                showRoomDetails(item.roomId, snapshot.val());
-            });
-        });
-
-        return card;
-    }
-
-    function showRoomDetails(roomId, roomData) {
-        const roomNumber = roomId.replace('room_', '');
-        modalBody.innerHTML = `<h3>محادثة غرفة ${roomNumber}</h3>`;
-
-        const chatHistory = document.createElement('div');
-        chatHistory.className = 'chat-history';
-
-        const comments = roomData.comments ? Object.entries(roomData.comments).map(([id, data]) => ({...data, id, type: 'comment'})) : [];
-        const replies = roomData.replies ? Object.entries(roomData.replies).map(([id, data]) => ({...data, id, type: 'reply'})) : [];
-        
-        const allMessages = [...comments, ...replies].sort((a,b) => a.timestamp - b.timestamp);
-
-        allMessages.forEach(msg => {
-            const messageEl = document.createElement('div');
-            messageEl.className = `chat-message ${msg.type === 'comment' ? 'user' : 'admin'}`;
-            messageEl.innerHTML = `
-                <div class="sender">${msg.type === 'comment' ? `النزيل (غرفة ${roomNumber})` : 'الإدارة'}</div>
-                <p>${msg.text}</p>
-                <div class="timestamp">${formatTimestamp(msg.timestamp)}</div>
-            `;
-            chatHistory.appendChild(messageEl);
-        });
-
-        modalBody.appendChild(chatHistory);
-        
-        // Reply Form
-        const replyForm = document.createElement('div');
-        replyForm.id = 'reply-form';
-        replyForm.innerHTML = `
-            <h4>إرسال رد</h4>
-            <textarea id="reply-text-area" placeholder="اكتب ردك هنا..."></textarea>
-            <button id="send-reply-btn">إرسال الرد</button>
-        `;
-        
-        modalBody.appendChild(replyForm);
-
-        document.getElementById('send-reply-btn').addEventListener('click', async () => {
-            const replyText = document.getElementById('reply-text-area').value.trim();
-            if (replyText) {
-                const replyRef = db.ref(`rooms/${roomId}/replies`);
-                try {
-                    await replyRef.push({
-                        text: replyText,
-                        timestamp: firebase.database.ServerValue.TIMESTAMP
-                    });
-                    showToast('تم إرسال الرد بنجاح', 'success');
-                    // No need to close modal immediately, let admin see the sent message
-                } catch(err) {
-                    showToast('خطأ في إرسال الرد', 'error');
-                }
-            }
-        });
-
-        detailsModal.classList.remove('hidden');
-    }
-    
-    function updateDashboardStats(rooms) {
-        let occupiedCount = 0;
-        let serviceCount = 0;
-        let orderCount = 0;
+    function updateDashboard(roomsData) {
+        let occupiedRooms = 0;
+        let newMessages = 0;
+        let newOrders = 0;
         let totalRating = 0;
         let ratingCount = 0;
 
-        Object.values(rooms).forEach(room => {
-            occupiedCount++;
+        Object.values(roomsData).forEach(room => {
+            occupiedRooms++;
             if (room.comments) {
-                const comments = Object.values(room.comments);
-                serviceCount += comments.length;
-                comments.forEach(c => {
-                    if (c.rating) {
-                        totalRating += c.rating;
+                Object.values(room.comments).forEach(comment => {
+                    if (!comment.isRead) newMessages++;
+                    if (comment.rating) {
+                        totalRating += comment.rating;
                         ratingCount++;
                     }
                 });
             }
-            if (room.orders) {
-                orderCount += Object.values(room.orders).length;
+             if (room.orders) {
+                Object.values(room.orders).forEach(order => {
+                    if (order.status === 'pending') newOrders++;
+                });
             }
         });
 
-        document.getElementById('occupied-rooms-count').textContent = occupiedCount;
-        document.getElementById('service-requests-count').textContent = serviceCount;
-        document.getElementById('food-orders-count').textContent = orderCount;
+        document.getElementById('occupied-rooms-count').textContent = occupiedRooms;
+        document.getElementById('new-messages-count').textContent = newMessages;
+        document.getElementById('new-orders-count').textContent = newOrders;
         document.getElementById('average-rating').textContent = ratingCount > 0 ? (totalRating / ratingCount).toFixed(1) : 'N/A';
+        document.getElementById('notification-count').textContent = newMessages + newOrders;
     }
 
-
-    // --- Utility Functions ---
-    function formatTimestamp(ts) {
-        if (!ts) return 'غير متوفر';
-        return new Date(ts).toLocaleString('ar-EG', {
-            year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+    function updateRoomsGrid(roomsData) {
+        const roomsGrid = document.getElementById('rooms-grid');
+        roomsGrid.innerHTML = '';
+        Object.keys(roomsData).forEach(roomId => {
+            const roomData = roomsData[roomId];
+            const roomCard = document.createElement('div');
+            roomCard.className = 'room-card occupied'; // Simplified status
+            
+            const roomNumber = roomId.replace('room_', '');
+            
+            roomCard.innerHTML = `
+                <div class="room-card-header">
+                    <h3>غرفة ${roomNumber}</h3>
+                    <span class="room-status occupied">مشغولة</span>
+                </div>
+                <div class="room-card-body">
+                    <p><strong>آخر نشاط:</strong> ${roomData.lastActivity ? new Date(roomData.lastActivity).toLocaleString() : 'لا يوجد'}</p>
+                </div>
+                <div class="room-card-actions">
+                    <button class="details-btn" data-room-id="${roomId}">عرض التفاصيل</button>
+                </div>
+            `;
+            roomsGrid.appendChild(roomCard);
+        });
+         // Add event listeners for new buttons
+        document.querySelectorAll('.details-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                openDetailsModal(button.dataset.roomId);
+            });
         });
     }
 
-    function findLastActivity(roomData) {
-        const lastCommentTs = roomData.comments ? Math.max(...Object.values(roomData.comments).map(c => c.timestamp)) : 0;
-        const lastReplyTs = roomData.replies ? Math.max(...Object.values(roomData.replies).map(r => r.timestamp)) : 0;
-        const lastOrderTs = roomData.orders ? Math.max(...Object.values(roomData.orders).map(o => o.timestamp)) : 0;
-        return Math.max(lastCommentTs, lastReplyTs, lastOrderTs);
+    function updateMessagesList(roomsData) {
+        const messagesList = document.getElementById('messages-list');
+        messagesList.innerHTML = '';
+        const allMessages = [];
+
+        Object.keys(roomsData).forEach(roomId => {
+            const roomData = roomsData[roomId];
+            if (roomData.comments) {
+                Object.keys(roomData.comments).forEach(commentId => {
+                    allMessages.push({ ...roomData.comments[commentId], roomId, commentId, type: 'comment' });
+                });
+            }
+        });
+        
+        allMessages.sort((a, b) => b.timestamp - a.timestamp);
+
+        allMessages.forEach(msg => {
+            const messageItem = document.createElement('div');
+            messageItem.className = `message-item ${!msg.isRead ? 'new' : ''}`;
+            const roomNumber = msg.roomId.replace('room_', '');
+
+            messageItem.innerHTML = `
+                <div class="message-info">
+                    <p><strong>غرفة ${roomNumber}:</strong> ${msg.text.substring(0, 50)}...</p>
+                    <p class="meta">
+                        <span>${new Date(msg.timestamp).toLocaleString()}</span>
+                        ${msg.rating ? `<span> - <i class="fas fa-star" style="color: #FFC107;"></i> ${msg.rating}</span>` : ''}
+                    </p>
+                </div>
+                <div class="message-actions">
+                    <button class="details-btn" data-room-id="${msg.roomId}" data-comment-id="${msg.commentId}">الرد والتفاصيل</button>
+                </div>
+            `;
+            messagesList.appendChild(messageItem);
+        });
+        document.querySelectorAll('.details-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                openDetailsModal(button.dataset.roomId, button.dataset.commentId);
+            });
+        });
     }
     
-     function showToast(message, type = 'info') {
+    function updateOrdersList(roomsData) {
+        const ordersList = document.getElementById('orders-list');
+        ordersList.innerHTML = '';
+        const allOrders = [];
+
+        Object.keys(roomsData).forEach(roomId => {
+            const roomData = roomsData[roomId];
+            if (roomData.orders) {
+                Object.keys(roomData.orders).forEach(orderId => {
+                    allOrders.push({ ...roomData.orders[orderId], roomId, orderId });
+                });
+            }
+        });
+
+        allOrders.sort((a, b) => b.timestamp - a.timestamp);
+        
+        allOrders.forEach(order => {
+            const orderItem = document.createElement('div');
+            orderItem.className = `order-item ${order.status === 'pending' ? 'new' : ''}`;
+             const roomNumber = order.roomId.replace('room_', '');
+
+            orderItem.innerHTML = `
+                 <div class="order-info">
+                    <p><strong>طلب طعام من غرفة ${roomNumber}</strong></p>
+                    <p>الإجمالي: ${order.total.toFixed(2)} ج.م</p>
+                    <p class="meta">
+                        <span>${new Date(order.timestamp).toLocaleString()}</span>
+                         - <span class="status-${order.status}">${translateStatus(order.status)}</span>
+                    </p>
+                </div>
+                <div class="order-actions">
+                     <button class="details-btn" data-room-id="${order.roomId}" data-order-id="${order.orderId}">التفاصيل</button>
+                     ${order.status === 'pending' ? `<button class="update-status-btn" data-room-id="${order.roomId}" data-order-id="${order.orderId}" data-new-status="processing">بدء التجهيز</button>` : ''}
+                     ${order.status === 'processing' ? `<button class="update-status-btn" data-room-id="${order.roomId}" data-order-id="${order.orderId}" data-new-status="completed">تم التسليم</button>` : ''}
+                </div>
+            `;
+            ordersList.appendChild(orderItem);
+        });
+        
+        document.querySelectorAll('.details-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                openDetailsModal(button.dataset.roomId, null, button.dataset.orderId);
+            });
+        });
+        document.querySelectorAll('.update-status-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                updateOrderStatus(button.dataset.roomId, button.dataset.orderId, button.dataset.newStatus);
+            });
+        });
+    }
+
+
+    // --- Modal ---
+    async function openDetailsModal(roomId, commentId = null, orderId = null) {
+        currentRoomId = roomId;
+        const roomNumber = roomId.replace('room_', '');
+        let content = '';
+
+        const roomRef = db.ref(`rooms/${roomId}`);
+        const snapshot = await roomRef.once('value');
+        const roomData = snapshot.val();
+        
+        content += `<h4>سجل غرفة ${roomNumber}</h4>`;
+        
+        const allItems = [];
+        if(roomData.comments) Object.entries(roomData.comments).forEach(([id, c]) => allItems.push({...c, id, type: 'comment'}));
+        if(roomData.orders) Object.entries(roomData.orders).forEach(([id, o]) => allItems.push({...o, id, type: 'order'}));
+        if(roomData.replies) Object.entries(roomData.replies).forEach(([id, r]) => allItems.push({...r, id, type: 'reply'}));
+
+        allItems.sort((a,b) => a.timestamp - b.timestamp);
+
+        content += '<div class="conversation-history">';
+        allItems.forEach(item => {
+            if(item.type === 'comment') {
+                content += `<div class="chat-bubble guest"><p>${item.text}</p><span class="timestamp">${new Date(item.timestamp).toLocaleTimeString()}</span></div>`;
+            } else if (item.type === 'order') {
+                 content += `<div class="chat-bubble guest"><p><strong>طلب طعام:</strong> ${item.items.map(i => `${i.quantity}x ${i.name_ar}`).join(', ')}</p><span class="timestamp">${new Date(item.timestamp).toLocaleTimeString()}</span></div>`;
+            } else if(item.type === 'reply') {
+                content += `<div class="chat-bubble admin"><p>${item.text}</p><span class="timestamp">${new Date(item.timestamp).toLocaleTimeString()}</span></div>`;
+            }
+        });
+        content += '</div>';
+
+        modalTitle.textContent = `محادثة مع غرفة ${roomNumber}`;
+        modalBody.innerHTML = content;
+        modalOverlay.classList.remove('hidden');
+    }
+
+    modalCloseBtn.addEventListener('click', () => modalOverlay.classList.add('hidden'));
+
+    sendReplyBtn.addEventListener('click', async () => {
+        const text = replyTextarea.value.trim();
+        if (!text || !currentRoomId) return;
+
+        const replyData = {
+            text: text,
+            timestamp: firebase.database.ServerValue.TIMESTAMP,
+            role: 'admin'
+        };
+
+        try {
+            const repliesRef = db.ref(`rooms/${currentRoomId}/replies`);
+            await repliesRef.push(replyData);
+            showToast('تم إرسال الرد بنجاح.', 'success');
+            replyTextarea.value = '';
+            // Refresh modal content
+            openDetailsModal(currentRoomId);
+        } catch (error) {
+            console.error("Error sending reply:", error);
+            showToast('حدث خطأ أثناء إرسال الرد.', 'error');
+        }
+    });
+    
+    // --- Actions ---
+    async function updateOrderStatus(roomId, orderId, newStatus) {
+        const orderStatusRef = db.ref(`rooms/${roomId}/orders/${orderId}/status`);
+        try {
+            await orderStatusRef.set(newStatus);
+            showToast(`تم تحديث حالة الطلب إلى: ${translateStatus(newStatus)}`, 'info');
+             // Also send a reply to the guest
+            const replyText = `تم تحديث حالة طلب الطعام الخاص بك. الحالة الآن: ${translateStatus(newStatus)}.`;
+            const repliesRef = db.ref(`rooms/${roomId}/replies`);
+             await repliesRef.push({
+                text: replyText,
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                role: 'admin'
+            });
+
+        } catch (error) {
+            showToast('خطأ في تحديث حالة الطلب.', 'error');
+            console.error('Error updating status:', error);
+        }
+    }
+
+
+    // --- Utilities ---
+    function showToast(message, type = 'info') {
         const toastContainer = document.getElementById('toast-container');
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
         toast.textContent = message;
-        
         toastContainer.appendChild(toast);
         
-        // Trigger the animation
-        setTimeout(() => {
-            toast.classList.add('show');
-        }, 100);
-        
-        // Remove the toast after 3 seconds
+        setTimeout(() => toast.classList.add('show'), 10);
         setTimeout(() => {
             toast.classList.remove('show');
-            setTimeout(() => {
-                toast.remove();
-            }, 300);
+            setTimeout(() => toast.remove(), 500);
         }, 3000);
+    }
+    
+    function translateStatus(status) {
+        switch(status) {
+            case 'pending': return 'معلق';
+            case 'processing': return 'قيد التجهيز';
+            case 'completed': return 'مكتمل';
+            case 'cancelled': return 'ملغي';
+            default: return status;
+        }
     }
 
     // --- Initial Load ---
