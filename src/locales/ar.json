@@ -4,7 +4,6 @@
     "chat": "المساعد الذكي",
     "menu": "قائمة الطعام",
     "services": "طلبات وخدمات",
-    "admin": "لوحة الإدارة",
     "about": "عن الفندق",
     "toggle": "تبديل القائمة"
   },
@@ -124,14 +123,7 @@
   },
    "about": {
     "title": "عن فندق قاعود",
-    "description": "اعرف المزيد عن تاريخنا ورسالتنا والفريق الذي يجعل إقامتك مميزة.",
-    "privacy_policy": "سياسة الخصوصية",
-    "password_prompt_title": "دخول المسؤول",
-    "password_prompt_text": "الرجاء إدخال كلمة مرور المسؤول للمتابعة.",
-    "password_prompt_placeholder": "كلمة المرور",
-    "password_prompt_confirm": "تأكيد",
-    "password_prompt_cancel": "إلغاء",
-    "incorrect_password": "كلمة المرور غير صحيحة."
+    "description": "اعرف المزيد عن تاريخنا ورسالتنا والفريق الذي يجعل إقامتك مميزة."
   },
   "language": {
     "english": "English",

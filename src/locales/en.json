@@ -4,7 +4,6 @@
     "chat": "AI Assistant",
     "menu": "Food Menu",
     "services": "Requests & Services",
-    "admin": "Admin Panel",
     "about": "About",
     "toggle": "Toggle Menu"
   },
@@ -124,14 +123,7 @@
   },
   "about": {
     "title": "About Kauod Hotel",
-    "description": "Learn more about our history, mission, and the team that makes your stay special.",
-    "privacy_policy": "Privacy Policy",
-    "password_prompt_title": "Admin Access",
-    "password_prompt_text": "Please enter the admin password to continue.",
-    "password_prompt_placeholder": "Password",
-    "password_prompt_confirm": "Confirm",
-    "password_prompt_cancel": "Cancel",
-    "incorrect_password": "Incorrect password."
+    "description": "Learn more about our history, mission, and the team that makes your stay special."
   },
   "language": {
     "english": "English",
