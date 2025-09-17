@@ -1,3 +1,4 @@
+
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
@@ -9,6 +10,7 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
+    unoptimized: true, // Required for static export
     remotePatterns: [
       {
         protocol: 'https',
@@ -36,7 +38,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  output: "standalone"
+  output: "export" // Changed from standalone to export
 };
 
 export default nextConfig;
