@@ -4,405 +4,124 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة تحكم فندق قاعود</title>
-    
-    <!-- Google Fonts -->
+    <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
-    <style>
-        :root {
-            --primary-gold: #D4AF37;
-            --dark-brown: #3E2723;
-            --rich-brown: #5D4037;
-            --cream: #EFEBE9;
-            --white: #FFFFFF;
-            --light-gray: #f8f9fa;
-            --gray: #6c757d;
-            --dark-gray: #343a40;
-            --success: #28a745;
-            --info: #17a2b8;
-            --warning: #ffc107;
-            --danger: #dc3545;
-        }
-
-        body {
-            font-family: 'Tajawal', sans-serif;
-            background-color: var(--cream);
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-        }
-
-        #login-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        #login-modal {
-            background: var(--white);
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            text-align: center;
-            width: 350px;
-        }
-
-        #login-modal h3 {
-            color: var(--dark-brown);
-            margin-bottom: 20px;
-        }
-
-        #login-modal input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        #login-modal button {
-            width: 100%;
-            padding: 10px;
-            background-color: var(--rich-brown);
-            color: var(--white);
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        #login-modal button:hover {
-            background-color: var(--dark-brown);
-        }
-
-        #admin-panel {
-            display: flex;
-            height: 100vh;
-        }
-
-        /* Sidebar Styles */
-        #sidebar {
-            width: 280px;
-            background-color: var(--dark-brown);
-            color: var(--white);
-            display: flex;
-            flex-direction: column;
-            transition: width 0.3s;
-        }
-
-        #sidebar.collapsed {
-            width: 80px;
-        }
-
-        .sidebar-header {
-            padding: 20px;
-            text-align: center;
-            border-bottom: 1px solid var(--rich-brown);
-        }
-        
-        .sidebar-header .logo {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            margin: 0 auto 10px;
-        }
-
-        .sidebar-header h4 {
-            margin: 0;
-            font-size: 1.2rem;
-            color: var(--primary-gold);
-        }
-        
-        #sidebar.collapsed .sidebar-header h4, #sidebar.collapsed .nav-text {
-            display: none;
-        }
-
-        .sidebar-nav {
-            flex-grow: 1;
-            list-style: none;
-            padding: 20px 0;
-            margin: 0;
-        }
-
-        .sidebar-nav li a {
-            display: flex;
-            align-items: center;
-            padding: 15px 25px;
-            color: var(--cream);
-            text-decoration: none;
-            transition: background-color 0.3s, color 0.3s;
-            white-space: nowrap;
-        }
-        
-        #sidebar.collapsed .sidebar-nav li a {
-            justify-content: center;
-        }
-
-        .sidebar-nav li a:hover, .sidebar-nav li a.active {
-            background-color: var(--primary-gold);
-            color: var(--dark-brown);
-        }
-
-        .sidebar-nav li a i {
-            font-size: 1.2rem;
-            margin-left: 15px;
-        }
-        
-        #sidebar.collapsed .sidebar-nav li a i {
-            margin-left: 0;
-        }
-
-
-        .sidebar-footer {
-            padding: 20px;
-            text-align: center;
-            border-top: 1px solid var(--rich-brown);
-        }
-
-        .sidebar-footer button {
-            background: none;
-            border: 1px solid var(--primary-gold);
-            color: var(--primary-gold);
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 100%;
-        }
-        
-        #sidebar.collapsed .sidebar-footer .nav-text {
-            display: none;
-        }
-
-        /* Main Content Styles */
-        #main-content {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .topbar {
-            background-color: var(--white);
-            padding: 15px 25px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .topbar #toggle-btn {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--dark-brown);
-        }
-
-        .topbar .admin-info {
-            color: var(--dark-brown);
-        }
-
-        .page-content {
-            flex-grow: 1;
-            padding: 30px;
-            overflow-y: auto;
-        }
-
-        .page {
-            display: none;
-        }
-        
-        .page.active {
-            display: block;
-        }
-
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-
-    <!-- Login Overlay -->
     <div id="login-overlay">
         <div id="login-modal">
-            <h3>لوحة تحكم فندق قاعود</h3>
-            <input type="password" id="password" placeholder="كلمة المرور">
+            <h2>تسجيل دخول المشرف</h2>
+            <p>الرجاء إدخال كلمة المرور للوصول إلى لوحة التحكم.</p>
+            <input type="password" id="password-input" placeholder="كلمة المرور">
             <button id="login-btn">دخول</button>
-            <p id="login-error" style="color: red; margin-top: 10px; display: none;">كلمة المرور غير صحيحة.</p>
+            <p id="login-error"></p>
         </div>
     </div>
 
-    <!-- Admin Panel -->
-    <div id="admin-panel" style="display: none;">
-        <!-- Sidebar -->
-        <nav id="sidebar">
+    <div id="admin-panel" class="hidden">
+        <aside id="sidebar">
             <div class="sidebar-header">
-                <img src="https://ik.imagekit.io/iz3ll61i9/IMG-20250718-WA0019.jpg" alt="Logo" class="logo">
-                <h4>فندق قاعود</h4>
+                <i class="fas fa-hotel"></i>
+                <h1>فندق قاعود</h1>
             </div>
-            <ul class="sidebar-nav">
-                <li><a href="#" class="nav-link active" data-page="dashboard"><i class="fas fa-tachometer-alt"></i> <span class="nav-text">الرئيسية</span></a></li>
-                <li><a href="#" class="nav-link" data-page="service-requests"><i class="fas fa-concierge-bell"></i> <span class="nav-text">طلبات الخدمة</span></a></li>
-                <li><a href="#" class="nav-link" data-page="food-orders"><i class="fas fa-utensils"></i> <span class="nav-text">طلبات الطعام</span></a></li>
-                <li><a href="#" class="nav-link" data-page="rooms-management"><i class="fas fa-bed"></i> <span class="nav-text">إدارة الغرف</span></a></li>
-                <li><a href="#" class="nav-link" data-page="reports"><i class="fas fa-chart-line"></i> <span class="nav-text">التقارير</span></a></li>
-                <li><a href="#" class="nav-link" data-page="settings"><i class="fas fa-cogs"></i> <span class="nav-text">الإعدادات</span></a></li>
-            </ul>
+            <nav>
+                <ul>
+                    <li><a href="#" class="nav-link active" data-target="dashboard-section"><i class="fas fa-tachometer-alt"></i><span>الرئيسية</span></a></li>
+                    <li><a href="#" class="nav-link" data-target="rooms-section"><i class="fas fa-door-open"></i><span>إدارة الغرف</span></a></li>
+                    <li><a href="#" class="nav-link" data-target="messages-section"><i class="fas fa-comments"></i><span>الرسائل</span></a></li>
+                    <li><a href="#" class="nav-link" data-target="orders-section"><i class="fas fa-utensils"></i><span>طلبات الطعام</span></a></li>
+                </ul>
+            </nav>
             <div class="sidebar-footer">
-                <button id="logout-btn-sidebar"><i class="fas fa-sign-out-alt"></i> <span class="nav-text">تسجيل الخروج</span></button>
+                <button id="logout-btn"><i class="fas fa-sign-out-alt"></i><span>تسجيل الخروج</span></button>
             </div>
-        </nav>
+        </aside>
 
-        <!-- Main Content -->
         <main id="main-content">
-            <div class="topbar">
-                <button id="toggle-btn"><i class="fas fa-bars"></i></button>
-                <div class="admin-info">
-                    <span>مرحباً, <strong>مشرف</strong></span>
+            <header>
+                <button id="menu-toggle"><i class="fas fa-bars"></i></button>
+                <h2>لوحة التحكم الرئيسية</h2>
+                <div id="notification-bell">
+                    <i class="fas fa-bell"></i>
+                    <span id="notification-count" class="hidden">0</span>
                 </div>
-            </div>
-            <div class="page-content">
-                <!-- Dashboard Page -->
-                <div id="dashboard" class="page active">
-                    <h1>الصفحة الرئيسية</h1>
-                    <!-- Content will be added here -->
-                </div>
-                
-                <!-- Service Requests Page -->
-                <div id="service-requests" class="page">
-                    <h1>طلبات الخدمة</h1>
-                    <!-- Content will be added here -->
-                </div>
+            </header>
 
-                <!-- Food Orders Page -->
-                <div id="food-orders" class="page">
-                    <h1>طلبات الطعام</h1>
-                    <!-- Content will be added here -->
+            <section id="dashboard-section" class="content-section active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <i class="fas fa-door-open"></i>
+                        <div>
+                            <p>الغرف المشغولة</p>
+                            <h3 id="occupied-rooms-count">0</h3>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-concierge-bell"></i>
+                        <div>
+                            <p>طلبات الخدمة</p>
+                            <h3 id="service-requests-count">0</h3>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-utensils"></i>
+                        <div>
+                            <p>طلبات الطعام</p>
+                            <h3 id="food-orders-count">0</h3>
+                        </div>
+                    </div>
+                     <div class="stat-card">
+                        <i class="fas fa-star"></i>
+                        <div>
+                            <p>متوسط التقييم</p>
+                            <h3 id="average-rating">0</h3>
+                        </div>
+                    </div>
                 </div>
+                <!-- More dashboard content here -->
+            </section>
+            
+            <section id="rooms-section" class="content-section">
+                <h2>إدارة الغرف</h2>
+                <div id="rooms-container" class="rooms-grid">
+                    <!-- Room cards will be inserted here by JS -->
+                </div>
+            </section>
 
-                <!-- Rooms Management Page -->
-                <div id="rooms-management" class="page">
-                    <h1>إدارة الغرف</h1>
-                    <!-- Content will be added here -->
-                </div>
+            <section id="messages-section" class="content-section">
+                 <h2>رسائل النزلاء</h2>
+                 <div id="messages-container" class="items-list">
+                    <!-- Messages will be inserted here by JS -->
+                 </div>
+            </section>
 
-                <!-- Reports Page -->
-                <div id="reports" class="page">
-                    <h1>التقارير</h1>
-                    <!-- Content will be added here -->
+            <section id="orders-section" class="content-section">
+                <h2>طلبات الطعام</h2>
+                <div id="orders-container" class="items-list">
+                    <!-- Food orders will be inserted here by JS -->
                 </div>
-                
-                <!-- Settings Page -->
-                <div id="settings" class="page">
-                    <h1>الإعدادات</h1>
-                    <!-- Content will be added here -->
-                </div>
-            </div>
+            </section>
         </main>
     </div>
 
-    <!-- Firebase SDK -->
+    <!-- Modal for details and replies -->
+    <div id="details-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="close-modal-btn"><i class="fas fa-times"></i></button>
+            <div id="modal-body">
+                <!-- Modal content will be loaded by JS -->
+            </div>
+        </div>
+    </div>
+    
+    <div id="toast-container"></div>
+
+
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // --- Authentication ---
-            const loginOverlay = document.getElementById('login-overlay');
-            const adminPanel = document.getElementById('admin-panel');
-            const loginBtn = document.getElementById('login-btn');
-            const passwordInput = document.getElementById('password');
-            const loginError = document.getElementById('login-error');
-            const correctPassword = "admin123";
-
-            // Check session storage
-            if (sessionStorage.getItem('isAdminAuthenticated') === 'true') {
-                loginOverlay.style.display = 'none';
-                adminPanel.style.display = 'flex';
-            }
-
-            loginBtn.addEventListener('click', () => {
-                if (passwordInput.value === correctPassword) {
-                    sessionStorage.setItem('isAdminAuthenticated', 'true');
-                    loginOverlay.style.display = 'none';
-                    adminPanel.style.display = 'flex';
-                    loginError.style.display = 'none';
-                } else {
-                    loginError.style.display = 'block';
-                }
-            });
-            
-            passwordInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    loginBtn.click();
-                }
-            });
-
-            // --- Logout ---
-            const logout = () => {
-                sessionStorage.removeItem('isAdminAuthenticated');
-                location.reload();
-            };
-            document.getElementById('logout-btn-sidebar').addEventListener('click', logout);
-
-
-            // --- Sidebar Toggle ---
-            const sidebar = document.getElementById('sidebar');
-            document.getElementById('toggle-btn').addEventListener('click', () => {
-                sidebar.classList.toggle('collapsed');
-            });
-            
-            // --- Page Navigation ---
-            const navLinks = document.querySelectorAll('.nav-link');
-            const pages = document.querySelectorAll('.page');
-
-            navLinks.forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const pageId = link.getAttribute('data-page');
-
-                    // Deactivate all
-                    navLinks.forEach(l => l.classList.remove('active'));
-                    pages.forEach(p => p.classList.remove('active'));
-
-                    // Activate clicked
-                    link.classList.add('active');
-                    document.getElementById(pageId).classList.add('active');
-                });
-            });
-
-
-            // --- Firebase Initialization ---
-            const firebaseConfig = {
-                apiKey: "AIzaSyApgrwfyrVJYsihy9tUwPfazdNYZPqWbow",
-                authDomain: "kaoud-hotel.firebaseapp.com",
-                databaseURL: "https://kaoud-hotel-default-rtdb.firebaseio.com",
-                projectId: "kaoud-hotel",
-                storageBucket: "kaoud-hotel.appspot.com",
-                messagingSenderId: "77309702077",
-                appId: "1:77309702077:web:1eee14c06204def2eb6cd4"
-            };
-            firebase.initializeApp(firebaseConfig);
-            const db = firebase.database();
-            
-            // More JS code for fetching data, charts, etc. will be added here
-        });
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
