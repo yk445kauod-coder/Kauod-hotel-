@@ -4,144 +4,133 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة تحكم فندق قاعود</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-    <!-- Login Modal -->
-    <div id="login-modal" class="modal-overlay show">
-        <div class="modal-content">
-            <h3 class="text-center mb-4">تسجيل الدخول للوحة التحكم</h3>
-            <div class="mb-3">
-                <label for="password" class="form-label">كلمة المرور</label>
-                <input type="password" class="form-control" id="password" placeholder="أدخل كلمة المرور">
-            </div>
-            <button id="login-btn" class="btn btn-primary w-100">دخول</button>
-            <p id="login-error" class="text-danger mt-2 d-none">كلمة المرور غير صحيحة.</p>
+    <!-- Login Overlay -->
+    <div id="login-overlay" class="active">
+        <div id="login-modal">
+            <h2>تسجيل دخول المشرف</h2>
+            <p>الرجاء إدخال كلمة المرور للوصول إلى لوحة التحكم.</p>
+            <input type="password" id="password-input" placeholder="كلمة المرور">
+            <button id="login-button">دخول</button>
+            <p id="login-error" class="error-message"></p>
         </div>
     </div>
 
-    <div class="d-flex" id="admin-panel" style="display: none!important;">
-        <!-- Sidebar -->
-        <aside class="sidebar">
+    <!-- Main Wrapper -->
+    <div id="main-wrapper" class="hidden">
+        <aside id="sidebar">
             <div class="sidebar-header">
-                <h3><i class="fas fa-hotel me-2"></i>فندق قاعود</h3>
+                <i class="fas fa-hotel"></i>
+                <h1>فندق قاعود</h1>
             </div>
-            <nav class="nav flex-column">
-                <a class="nav-link active" href="#" data-page="dashboard"><i class="fas fa-tachometer-alt me-2"></i>الرئيسية</a>
-                <a class="nav-link" href="#" data-page="service-requests"><i class="fas fa-concierge-bell me-2"></i>طلبات الخدمة</a>
-                <a class="nav-link" href="#" data-page="food-orders"><i class="fas fa-utensils me-2"></i>طلبات الطعام</a>
-                <a class="nav-link" href="#" data-page="rooms-management"><i class="fas fa-door-open me-2"></i>إدارة الغرف</a>
-                <a class="nav-link" href="#" data-page="reports"><i class="fas fa-chart-line me-2"></i>التقارير</a>
-                <a class="nav-link" href="#" data-page="settings"><i class="fas fa-cog me-2"></i>الإعدادات</a>
+            <nav class="sidebar-nav">
+                <a href="#dashboard" class="nav-item active" data-page="dashboard"><i class="fas fa-tachometer-alt"></i><span>الرئيسية</span></a>
+                <a href="#rooms" class="nav-item" data-page="rooms"><i class="fas fa-door-open"></i><span>إدارة الغرف</span></a>
+                <a href="#requests" class="nav-item" data-page="requests"><i class="fas fa-concierge-bell"></i><span>طلبات الخدمة</span></a>
+                <a href="#orders" class="nav-item" data-page="orders"><i class="fas fa-utensils"></i><span>طلبات الطعام</span></a>
             </nav>
             <div class="sidebar-footer">
-                <button id="logout-btn-sidebar" class="btn btn-dark w-100"><i class="fas fa-sign-out-alt me-2"></i>تسجيل الخروج</button>
+                <button id="logout-button"><i class="fas fa-sign-out-alt"></i><span>تسجيل الخروج</span></button>
             </div>
         </aside>
 
-        <!-- Main Content -->
-        <main class="main-content flex-grow-1">
-            <!-- Topbar -->
-            <header class="topbar">
-                <button class="btn btn-light d-md-none" id="sidebar-toggle-btn"><i class="fas fa-bars"></i></button>
-                <div class="ms-auto">
-                    <button id="logout-btn-topbar" class="btn btn-outline-secondary"><i class="fas fa-sign-out-alt me-2"></i>تسجيل الخروج</button>
+        <main id="main-content">
+            <header id="main-header">
+                <button id="sidebar-toggle"><i class="fas fa-bars"></i></button>
+                <h2>الرئيسية</h2>
+                <div class="header-actions">
+                    <div id="notification-bell">
+                        <i class="fas fa-bell"></i>
+                        <span id="notification-count" class="hidden">0</span>
+                    </div>
                 </div>
             </header>
 
-            <!-- Page Content -->
-            <div class="container-fluid p-4">
-                
+            <div id="page-content">
                 <!-- Dashboard Page -->
-                <div id="dashboard-page" class="page">
-                    <!-- Stats cards and charts will go here -->
-                </div>
+                <section id="dashboard-page" class="page active">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h4>إجمالي الطلبات</h4>
+                            <p id="total-requests-stat">0</p>
+                            <i class="fas fa-concierge-bell"></i>
+                        </div>
+                        <div class="stat-card">
+                            <h4>طلبات الطعام</h4>
+                            <p id="total-orders-stat">0</p>
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                        <div class="stat-card">
+                            <h4>الغرف النشطة</h4>
+                            <p id="active-rooms-stat">0</p>
+                            <i class="fas fa-door-open"></i>
+                        </div>
+                        <div class="stat-card">
+                            <h4>متوسط التقييم</h4>
+                            <p id="average-rating-stat">0/5</p>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <div class="recent-activity">
+                         <div class="recent-list">
+                            <h3>أحدث طلبات الخدمة</h3>
+                            <div id="recent-requests-list"></div>
+                        </div>
+                        <div class="recent-list">
+                            <h3>أحدث طلبات الطعام</h3>
+                            <div id="recent-orders-list"></div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Rooms Page -->
+                <section id="rooms-page" class="page">
+                    <div id="rooms-grid"></div>
+                </section>
 
                 <!-- Service Requests Page -->
-                <div id="service-requests-page" class="page d-none">
-                    <h2>طلبات الخدمة</h2>
-                    <div id="service-requests-container" class="row">
-                        <!-- Service request cards will be dynamically inserted here -->
+                <section id="requests-page" class="page">
+                    <div class="tabs">
+                        <button class="tab-button active" data-status="pending">جديدة</button>
+                        <button class="tab-button" data-status="processing">قيد التنفيذ</button>
+                        <button class="tab-button" data-status="completed">مكتملة</button>
                     </div>
-                </div>
+                    <div id="requests-container"></div>
+                </section>
 
                 <!-- Food Orders Page -->
-                <div id="food-orders-page" class="page d-none">
-                    <h2>طلبات الطعام</h2>
-                    <div class="food-orders-board">
-                        <!-- New Orders Column -->
-                        <div class="order-column">
-                            <h3 class="column-title new">
-                                <i class="fas fa-bell me-2"></i>طلبات جديدة (<span id="new-orders-count">0</span>)
-                            </h3>
-                            <div id="new-orders-container" class="order-list">
-                                <!-- New food order cards will be dynamically inserted here -->
-                            </div>
-                        </div>
-                        <!-- In Progress Orders Column -->
-                        <div class="order-column">
-                            <h3 class="column-title processing">
-                                <i class="fas fa-sync-alt fa-spin me-2"></i>قيد التنفيذ (<span id="processing-orders-count">0</span>)
-                            </h3>
-                            <div id="processing-orders-container" class="order-list">
-                                <!-- In-progress food order cards will be dynamically inserted here -->
-                            </div>
-                        </div>
-                        <!-- Completed Orders Column -->
-                        <div class="order-column">
-                            <h3 class="column-title completed">
-                                <i class="fas fa-check-circle me-2"></i>مكتملة (<span id="completed-orders-count">0</span>)
-                            </h3>
-                            <div id="completed-orders-container" class="order-list">
-                                <!-- Completed food order cards will be dynamically inserted here -->
-                            </div>
-                        </div>
+                <section id="orders-page" class="page">
+                     <div class="tabs">
+                        <button class="tab-button active" data-status="pending">جديدة</button>
+                        <button class="tab-button" data-status="processing">قيد التنفيذ</button>
+                        <button class="tab-button" data-status="completed">مكتملة</button>
                     </div>
-                </div>
-
-                <!-- Other pages will go here -->
-                <div id="rooms-management-page" class="page d-none"></div>
-                <div id="reports-page" class="page d-none"></div>
-                <div id="settings-page" class="page d-none"></div>
-
+                    <div id="orders-container"></div>
+                </section>
             </div>
         </main>
     </div>
 
-    <!-- Request Detail Modal -->
-    <div class="modal fade" id="requestDetailModal" tabindex="-1" aria-labelledby="requestDetailModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="requestDetailModalLabel">تفاصيل الطلب</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- Request details will be populated here -->
-                </div>
-                <div class="modal-footer">
-                    <div class="w-100">
-                        <h5>الرد على النزيل</h5>
-                        <textarea id="reply-message" class="form-control mb-2" rows="3" placeholder="اكتب ردك هنا..."></textarea>
-                        <button id="send-reply-btn" class="btn btn-primary">إرسال الرد</button>
-                    </div>
-                </div>
-            </div>
+    <!-- Modal for details -->
+    <div id="details-modal-overlay" class="hidden">
+        <div id="details-modal">
+            <button id="close-modal-button"><i class="fas fa-times"></i></button>
+            <div id="modal-content"></div>
         </div>
     </div>
 
+    <!-- Toast Notification -->
+    <div id="toast-notification" class=""></div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <!-- App Script -->
     <script src="script.js"></script>
 </body>
 </html>
