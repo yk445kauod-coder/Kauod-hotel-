@@ -2,7 +2,6 @@
 
 import { chatbotAssistance } from '@/ai/flows/chatbot-assistance';
 import { generateServiceRecommendations } from '@/ai/flows/personalized-service-recommendations';
-import { generateAdminReply } from '@/ai/flows/generate-admin-reply';
 import { revalidatePath } from 'next/cache';
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, push, serverTimestamp } from "firebase/database";
@@ -79,8 +78,6 @@ export async function submitServiceRequestAction(formData: FormData) {
             guestPhone: guestPhone
         });
 
-        revalidatePath('/admin');
-        
         if (type !== 'Food Order') {
             try {
                 const recommendations = await generateServiceRecommendations({
@@ -99,36 +96,5 @@ export async function submitServiceRequestAction(formData: FormData) {
     } catch (error) {
         console.error("Firebase push error:", error);
         return { success: false, error: "Failed to submit request to the database." };
-    }
-}
-
-export async function submitReplyAction(roomId: string, reply: string) {
-    if (!roomId || !reply) {
-         return { success: false, error: "Room ID and reply are required." };
-    }
-    const replyRef = ref(db, `rooms/room_${roomId}/replies`);
-    try {
-        await push(replyRef, {
-            text: reply,
-            timestamp: serverTimestamp()
-        });
-        revalidatePath(`/service-request`);
-        revalidatePath('/admin');
-        return { success: true, message: "Reply sent successfully." };
-    } catch(e) {
-        return { success: false, error: (e as Error).message };
-    }
-}
-
-export async function generateAdminReplyAction(guestMessage: string) {
-    if (!guestMessage) {
-        return { success: false, error: "Guest message is required." };
-    }
-    try {
-        const result = await generateAdminReply({ guestMessage });
-        return { success: true, response: result.suggestedReply };
-    } catch (error) {
-        console.error("AI Reply Generation Error:", error);
-        return { success: false, error: "Failed to generate AI reply." };
     }
 }
