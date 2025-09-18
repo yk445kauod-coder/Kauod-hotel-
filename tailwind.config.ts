@@ -24,6 +24,8 @@ export default {
       colors: {
         'gold': 'hsl(var(--primary))',
         'light-gold': 'hsl(var(--primary-foreground))',
+        'dark-brown': 'hsl(var(--accent))',
+        'cream': 'hsl(var(--background))',
         
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
@@ -118,3 +120,5 @@ export default {
       }
     ],
 } satisfies Config;
+
+    

@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from "next/image";
@@ -144,7 +145,7 @@ export default function MenuPage() {
        {totalItems > 0 && (
          <Dialog open={isCartOpen} onOpenChange={setIsCartOpen}>
           <DialogTrigger asChild>
-            <Button className="fixed bottom-8 right-8 h-16 w-16 rounded-full bg-primary text-primary-foreground shadow-lg z-50 flex items-center justify-center">
+            <Button className="fixed bottom-20 md:bottom-8 right-4 md:right-8 h-16 w-16 rounded-full bg-primary text-primary-foreground shadow-lg z-50 flex items-center justify-center">
               <ShoppingCart className="h-7 w-7" />
               <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs rounded-full h-6 w-6 flex items-center justify-center">{totalItems}</span>
             </Button>
@@ -204,7 +205,7 @@ export default function MenuPage() {
             {menuData.map((category) => (
             <section key={category.id} className="mb-12">
                 <div className="relative h-64 w-full rounded-lg overflow-hidden mb-6 shadow-lg border border-gold">
-                    <Image src={category.image} alt={language === 'ar' ? category.name : category.en_name} fill objectFit="cover" className="transform transition-transform duration-500 hover:scale-105" />
+                    <Image src={category.image} alt={language === 'ar' ? category.name : category.en_name} fill style={{objectFit: "cover"}} className="transform transition-transform duration-500 hover:scale-105" />
                 </div>
                 <h2 className="bg-gradient-to-r from-primary to-accent text-white text-3xl font-headline p-4 rounded-lg text-center mb-6 border-2 border-gold shadow-md">{language === 'ar' ? category.name : category.en_name}</h2>
 
@@ -236,3 +237,5 @@ export default function MenuPage() {
     </div>
   );
 }
+
+    

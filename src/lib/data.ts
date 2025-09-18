@@ -1,3 +1,4 @@
+
 export interface MenuItem {
   id: string;
   name: string;
@@ -91,7 +92,7 @@ export const menuData: MenuCategory[] = [
       id: "family-meals",
       name: "الوجبات العائلية",
       en_name: "Family Meals",
-      image: "https://images.unsplash.com/photo-1556911220-ef412ae179a9?q=80&w=1968",
+      image: "https://images.unsplash.com/photo-1626074353765-517a681e40be?q=80&w=2070",
       items: [
         {id: "family1", name: "وجبة 4 أفراد (مشويات)", en_name: "Meal for 4 Persons (Grilled)", price: 1190.00},
         {id: "family2", name: "وجبة 4 أفراد (ممتازة)", en_name: "Premium Meal for 4 Persons", price: 1450.00},
@@ -204,5 +205,7 @@ export const menuData: MenuCategory[] = [
   ];
   
       
+
+    
 
     
