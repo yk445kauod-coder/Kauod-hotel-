@@ -2,7 +2,6 @@
 "use server";
 
 import { chatbotAssistance } from '@/ai/flows/chatbot-assistance';
-import { generateServiceRecommendations } from '@/ai/flows/personalized-service-recommendations';
 import { revalidatePath } from 'next/cache';
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, push, serverTimestamp } from "firebase/database";
@@ -49,7 +48,7 @@ export async function chatbotAction(history: any, query: string) {
     }
 }
 
-export async function submitServiceRequestAction(formData: FormData): Promise<{ success: boolean; error?: string; recommendations?: string[] }> {
+export async function submitServiceRequestAction(formData: FormData): Promise<{ success: boolean; error?: string; }> {
     const rawFormData = {
         roomNumber: formData.get('roomNumber') as string,
         guestName: formData.get('guestName') as string,
@@ -79,21 +78,7 @@ export async function submitServiceRequestAction(formData: FormData): Promise<{ 
             guestPhone: guestPhone
         });
 
-        if (type !== 'Food Order') {
-            try {
-                const result = await generateServiceRecommendations({
-                    guestRequest: guestMessage,
-                    hotelDetails: hotelInfoString,
-                });
-                return { success: true, recommendations: result.recommendations };
-            } catch (error) {
-                console.error("Error generating recommendations:", error);
-                // Succeed even if recommendations fail
-                return { success: true, recommendations: [] }; 
-            }
-        }
-
-        return { success: true, recommendations: [] };
+        return { success: true };
 
     } catch (error) {
         console.error("Firebase push error:", error);

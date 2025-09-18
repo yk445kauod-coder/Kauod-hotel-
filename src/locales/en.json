@@ -98,8 +98,7 @@
     "success_desc": "Thank you! Your request is now being processed.",
     "error_title": "Error",
     "error_desc": "An error occurred while sending your request. Please try again.",
-    "admin_reply_title": "📨 Admin Reply:",
-    "recommendations_title": "💡 You might also like:"
+    "admin_reply_title": "📨 Admin Reply:"
   },
   "admin": {
     "title": "Guest Requests Admin Panel",
@@ -143,5 +142,3 @@
     "logout": "Logout"
   }
 }
-
-    

@@ -6,7 +6,7 @@ import { useTranslation } from '@/hooks/use-translation';
 import { useUser } from '@/context/user-context';
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, onChildAdded, serverTimestamp, push, off, get, child } from "firebase/database";
-import { Star, Send, Loader2, Bot, User as UserIcon, Sparkles } from 'lucide-react';
+import { Star, Send, Loader2, Bot, User as UserIcon } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -29,7 +29,7 @@ const db = getDatabase(app);
 
 type Message = {
     id: string;
-    role: 'user' | 'admin' | 'system';
+    role: 'user' | 'admin';
     text: string;
     timestamp: number;
     rating?: number;
@@ -131,15 +131,7 @@ export default function ServiceRequestPage() {
     const result = await submitServiceRequestAction(formData);
     
     if (result.success) {
-      if (result.recommendations && result.recommendations.length > 0) {
-        const recommendationsMessage: Message = {
-            id: `system-${Date.now()}`,
-            role: 'system',
-            text: `${t('services.recommendations_title')}\n- ${result.recommendations.join('\n- ')}`,
-            timestamp: Date.now(),
-        };
-        setMessages(prev => [...prev, recommendationsMessage]);
-      }
+      toast({ title: t('services.success_title'), description: t('services.success_desc') });
     } else {
         toast({ title: t('services.error_title'), description: result.error, variant: 'destructive'});
         // Restore input if submission failed
@@ -172,21 +164,16 @@ export default function ServiceRequestPage() {
                   ) : (
                     <div className="space-y-6">
                         {messages.map((message) => (
-                             <div key={message.id} className={`flex items-end gap-3 ${ message.role === 'user' ? 'justify-end' : message.role === 'system' ? 'justify-center' : '' }`}>
+                             <div key={message.id} className={`flex items-end gap-3 ${ message.role === 'user' ? 'justify-end' : '' }`}>
                                 {(message.role === 'admin') && (
                                     <Avatar className="h-8 w-8">
                                         <AvatarFallback><Bot /></AvatarFallback>
                                     </Avatar>
                                 )}
-                                 {message.role === 'system' && (
-                                     <Sparkles className="h-5 w-5 text-gold" />
-                                 )}
                                 <div className={`max-w-md rounded-lg p-3 text-sm ${
                                      message.role === 'user'
                                         ? 'bg-primary text-primary-foreground'
-                                        : message.role === 'admin'
-                                        ? 'bg-muted'
-                                        : 'bg-blue-100 dark:bg-blue-900/50 border border-blue-300 dark:border-blue-700 w-full'
+                                        : 'bg-muted'
                                 }`}>
                                      <p style={{ whiteSpace: "pre-wrap" }}>{message.text}</p>
                                      {message.rating && (
