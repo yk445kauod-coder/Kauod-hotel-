@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { MessageCircle, UtensilsCrossed, ConciergeBell, Check } from "lucide-react";
 import { useTranslation } from "@/hooks/use-translation";
+import { useUser } from "@/context/user-context";
 
 const featureCards = [
   {
@@ -39,6 +40,7 @@ const hotelFeatures = [
 
 export default function DashboardPage() {
   const { t } = useTranslation();
+  const { user } = useUser();
 
   return (
     <div className="flex flex-col">
@@ -51,8 +53,8 @@ export default function DashboardPage() {
           className="object-cover"
         />
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white bg-black/50 p-4">
-          <h1 className="text-4xl font-bold font-headline tracking-tight text-gold">{t('hotel.name')}</h1>
-          <p className="mt-2 max-w-xl text-lg text-light-gold">{t('hotel.description')}</p>
+          <h1 className="text-4xl font-bold font-headline tracking-tight text-gold text-shadow-md">{user.name ? `أهلاً بك، ${user.name}` : t('dashboard.title')}</h1>
+          <p className="mt-2 max-w-xl text-lg text-white/90 text-shadow">{t('hotel.description')}</p>
         </div>
       </section>
 
