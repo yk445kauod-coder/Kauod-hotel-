@@ -49,7 +49,7 @@ export async function chatbotAction(history: any, query: string) {
     }
 }
 
-export async function submitServiceRequestAction(formData: FormData) {
+export async function submitServiceRequestAction(formData: FormData): Promise<{ success: boolean; error?: string; recommendations?: string[] }> {
     const rawFormData = {
         roomNumber: formData.get('roomNumber') as string,
         guestName: formData.get('guestName') as string,
@@ -81,13 +81,14 @@ export async function submitServiceRequestAction(formData: FormData) {
 
         if (type !== 'Food Order') {
             try {
-                const recommendations = await generateServiceRecommendations({
+                const result = await generateServiceRecommendations({
                     guestRequest: guestMessage,
                     hotelDetails: hotelInfoString,
                 });
-                return { success: true, recommendations: recommendations.recommendations };
+                return { success: true, recommendations: result.recommendations };
             } catch (error) {
                 console.error("Error generating recommendations:", error);
+                // Succeed even if recommendations fail
                 return { success: true, recommendations: [] }; 
             }
         }
