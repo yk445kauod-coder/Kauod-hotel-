@@ -30,6 +30,7 @@
   },
   "dashboard": {
     "title": "Welcome to Kauod Hotel",
+    "welcome_user": "Welcome, {{name}}",
     "subtitle": "A luxury hotel in the heart of Alexandria offering a distinguished stay and high-end services.",
     "book_now": "Request Service Now",
     "our_services": "Our Services",

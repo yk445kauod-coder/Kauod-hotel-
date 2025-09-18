@@ -14,7 +14,7 @@ type NestedObject = { [key: string]: string | NestedObject };
 export const useTranslation = () => {
   const { language } = useLanguage();
 
-  const t = (key: string): string => {
+  const t = (key: string, replacements?: { [key: string]: string }): string => {
     const keys = key.split('.');
     let result: string | NestedObject | undefined = translations[language];
 
@@ -26,7 +26,16 @@ export const useTranslation = () => {
       }
     }
 
-    return typeof result === 'string' ? result : key;
+    if (typeof result === 'string') {
+        if (replacements) {
+            return Object.entries(replacements).reduce((acc, [key, value]) => {
+                return acc.replace(`{{${key}}}`, value);
+            }, result);
+        }
+        return result;
+    }
+    
+    return key;
   };
 
   return { t };
