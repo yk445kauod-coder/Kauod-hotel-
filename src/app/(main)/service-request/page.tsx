@@ -149,9 +149,9 @@ export default function ServiceRequestPage() {
   }
 
   return (
-    <div className="font-body bg-cream" dir={language === 'ar' ? 'rtl' : 'ltr'}>
-        <div className="container mx-auto p-0 md:p-4 h-[calc(100vh-100px)] flex flex-col">
-           <div className="flex-1 flex flex-col bg-white rounded-lg shadow-lg border border-gray-200">
+    <div className="flex flex-col h-full font-body bg-cream" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+        <div className="container mx-auto p-0 md:p-4 flex-1 flex flex-col">
+           <div className="flex-1 flex flex-col bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
                <header className="p-4 border-b">
                   <h2 className="text-xl font-bold text-primary">{t('services.title_chat')} - {t('admin.table.room')} {user.roomNumber}</h2>
                </header>
@@ -235,5 +235,3 @@ export default function ServiceRequestPage() {
     </div>
   );
 }
-
-    
