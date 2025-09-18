@@ -1,7 +1,6 @@
 
 "use client";
 
-import { Header } from "@/components/layout/header";
 import { LanguageModal } from "@/components/layout/language-modal";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -44,7 +43,6 @@ export default function MainLayout({
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <Header />
       <main className="flex-1 pb-20">
         {children}
       </main>
