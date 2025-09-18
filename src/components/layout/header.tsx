@@ -1,9 +1,10 @@
+
 "use client";
 
 import LoadingLink from "@/components/layout/loading-link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Languages, Menu, LogOut, User } from "lucide-react";
+import { Languages, LogOut, User, Menu } from "lucide-react";
 import { useLanguage } from "@/hooks/use-language";
 import { useTranslation } from "@/hooks/use-translation";
 import {
@@ -13,50 +14,26 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { MainSidebar } from "./main-sidebar";
 import { useUser } from "@/context/user-context";
 
 export function Header() {
   const { language, setLanguage } = useLanguage();
   const { t } = useTranslation();
-  const { user, logout, isDataGateOpen, setDataGateOpen } = useUser();
-
-  const navItems = [
-    { href: "/dashboard", label: "nav.dashboard" },
-    { href: "/menu", label: "nav.menu" },
-    { href: "/service-request", label: "nav.services" },
-    { href: "/chat", label: "nav.chat" },
-    { href: "/about", label: "nav.about" },
-  ];
+  const { user, logout, setDataGateOpen } = useUser();
   
   const handleLogout = () => {
     logout();
   }
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background/90 backdrop-blur-sm">
-      <div className="container mx-auto flex h-20 items-center justify-between">
+    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur-sm">
+      <div className="container mx-auto flex h-16 items-center justify-between">
         <LoadingLink href="/" className="flex items-center gap-3">
-          <Image src="https://ik.imagekit.io/iz3ll61i9/IMG-20250718-WA0019.jpg" alt="Kaoud Hotel Logo" width={50} height={50} className="rounded-full" />
-          <span className="text-xl font-bold font-headline text-primary">فندق قاعود</span>
+          <Image src="https://ik.imagekit.io/iz3ll61i9/IMG-20250718-WA0019.jpg" alt="Kaoud Hotel Logo" width={40} height={40} className="rounded-full" />
+          <span className="text-lg font-bold font-headline text-primary">{t('hotel.name')}</span>
         </LoadingLink>
-        
-        <nav className="hidden md:flex items-center gap-6">
-          {navItems.map((item) => (
-            <LoadingLink href={item.href} key={item.href} className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
-              {t(item.label)}
-            </LoadingLink>
-          ))}
-        </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
            <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
@@ -88,32 +65,16 @@ export function Header() {
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => setDataGateOpen(true)}>
-                        <User className="me-2" />
-                        {t('data_gate.edit_data')}
+                        <User className="mr-2 h-4 w-4" />
+                        <span>{t('data_gate.edit_data')}</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleLogout}>
-                        <LogOut className="me-2" />
-                        {t('data_gate.logout')}
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>{t('data_gate.logout')}</span>
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
            )}
-
-          <div className="md:hidden">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button size="icon" variant="ghost">
-                  <Menu className="h-6 w-6" />
-                  <span className="sr-only">{t('nav.toggle')}</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="p-0">
-                 <SheetTitle className="sr-only">Menu</SheetTitle>
-                 <SheetDescription className="sr-only">Hotel navigation menu</SheetDescription>
-                <MainSidebar />
-              </SheetContent>
-            </Sheet>
-          </div>
         </div>
       </div>
     </header>

@@ -2,11 +2,11 @@
 "use client";
 
 import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
 import { LanguageModal } from "@/components/layout/language-modal";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useUser } from "@/context/user-context";
+import { BottomNavBar } from "@/components/layout/bottom-nav-bar";
 
 export default function MainLayout({
   children,
@@ -43,12 +43,12 @@ export default function MainLayout({
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-background">
       <Header />
-      <main className="flex-1">
+      <main className="flex-1 pb-20">
         {children}
       </main>
-      <Footer />
+      <BottomNavBar />
       <LanguageModal isOpen={isLanguageModalOpen} onOpenChange={handleLanguageChange} />
     </div>
   );

@@ -1,3 +1,4 @@
+
 import type {Config} from 'tailwindcss';
 
 export default {
@@ -8,19 +9,21 @@ export default {
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
+    container: {
+      center: true,
+      padding: "1rem",
+      screens: {
+        "2xl": "1200px",
+      },
+    },
     extend: {
       fontFamily: {
         body: ['Tajawal', 'sans-serif'],
         headline: ['Tajawal', 'sans-serif'],
       },
       colors: {
-        'gold': '#D4AF37',
-        'dark-gold': '#B8860B',
-        'light-gold': '#F5E6A3',
-        'rich-brown': '#5D4037',
-        'dark-brown': '#3E2723',
-        'light-brown': '#8D6E63',
-        'cream': '#EFEBE9',
+        'gold': 'hsl(var(--primary))',
+        'light-gold': 'hsl(var(--primary-foreground))',
         
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
@@ -60,6 +63,9 @@ export default {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
+      },
+      boxShadow: {
+        't-lg': '0 -4px 6px -1px rgb(0 0 0 / 0.1), 0 -2px 4px -2px rgb(0 0 0 / 0.1)',
       },
       keyframes: {
         'accordion-down': {
