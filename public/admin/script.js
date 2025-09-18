@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function () {
     const firebaseConfig = {
         apiKey: "AIzaSyApgrwfyrVJYsihy9tUwPfazdNYZPqWbow",
         authDomain: "kaoud-hotel.firebaseapp.com",
@@ -12,220 +12,397 @@ document.addEventListener('DOMContentLoaded', () => {
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const passwordPrompt = document.getElementById('password-prompt');
-    const passwordInput = document.getElementById('password-input');
-    const passwordSubmit = document.getElementById('password-submit');
-    const adminPanel = document.getElementById('admin-panel');
-    const loadingOverlay = document.getElementById('loading-overlay');
-    const newOrdersContainer = document.getElementById('new-orders-container');
-    const inProgressOrdersContainer = document.getElementById('in-progress-orders-container');
-    const completedOrdersContainer = document.getElementById('completed-orders-container');
-    const roomsList = document.getElementById('rooms-list');
-    const chatList = document.getElementById('chat-list');
+    const roomsContainer = document.getElementById('rooms-container');
+    const messagesContainer = document.getElementById('messages-container');
+    const newOrdersContainer = document.getElementById('new-orders');
+    const inProgressOrdersContainer = document.getElementById('in-progress-orders');
+    const completedOrdersContainer = document.getElementById('completed-orders');
+    
+    const replyModal = document.getElementById('reply-modal');
+    const closeModalBtn = document.querySelector('.close-button');
+    const sendReplyBtn = document.getElementById('send-reply-btn');
+    const replyModalTitle = document.getElementById('reply-modal-title');
+    const modalGuestMessage = document.getElementById('modal-guest-message');
+    const replyMessageTextarea = document.getElementById('reply-message');
     const notificationSound = document.getElementById('notification-sound');
 
-    const correctPassword = "admin"; // Replace with a more secure method in production
+    // Stats
+    const activeRoomsStat = document.getElementById('active-rooms-stat');
+    const newOrdersStat = document.getElementById('new-orders-stat');
+    const newMessagesStat = document.getElementById('new-messages-stat');
+    const newOrdersCountBadge = document.getElementById('new-orders-count');
+    const newMessagesCountBadge = document.getElementById('new-messages-count');
 
-    passwordSubmit.addEventListener('click', () => {
-        if (passwordInput.value === correctPassword) {
-            passwordPrompt.style.display = 'none';
-            adminPanel.style.display = 'flex';
-            loadingOverlay.style.display = 'none';
-            loadInitialData();
-        } else {
-            alert('Incorrect password.');
-        }
+
+    let currentReplyContext = null;
+
+    // --- Navigation ---
+    const navItems = document.querySelectorAll('.nav-item, .quick-access-item');
+    const sections = document.querySelectorAll('.dashboard-section');
+
+    function switchTab(targetId) {
+        sections.forEach(section => {
+            section.classList.remove('active');
+        });
+        document.getElementById(targetId).classList.add('active');
+
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.remove('active');
+            if (item.dataset.target === targetId) {
+                item.classList.add('active');
+            }
+        });
+    }
+
+    navItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = item.dataset.target;
+            switchTab(targetId);
+        });
     });
+
+    function playNotificationSound() {
+        notificationSound.currentTime = 0;
+        notificationSound.play().catch(error => console.error("Audio playback failed:", error));
+    }
     
-    function showNotification(message) {
-        const notification = document.createElement('div');
-        notification.className = 'notification';
-        notification.textContent = message;
-        document.body.appendChild(notification);
-        notificationSound.play();
-        setTimeout(() => {
-            notification.remove();
-        }, 5000);
+    function updateBadge(badge, count) {
+        badge.textContent = count;
+        if (count > 0) {
+            badge.classList.add('visible');
+        } else {
+            badge.classList.remove('visible');
+        }
     }
 
-    function loadInitialData() {
-        listenForRooms();
-        listenForOrders();
-        listenForMessages();
+
+    // --- Rooms Logic ---
+    function renderRooms(roomsData, activeUsers) {
+        if (!roomsContainer) return;
+        roomsContainer.innerHTML = '';
+        const roomNumbers = Object.keys(roomsData);
+        let activeRoomsCount = 0;
+
+        // Sort rooms numerically
+        roomNumbers.sort((a, b) => parseInt(a.replace('room_', '')) - parseInt(b.replace('room_', '')));
+
+        for (const roomKey of roomNumbers) {
+            const roomNumber = roomKey.replace('room_', '');
+            const isActive = activeUsers.hasOwnProperty(roomKey);
+            if (isActive) activeRoomsCount++;
+
+            const roomCard = document.createElement('div');
+            roomCard.className = 'room-card';
+            roomCard.innerHTML = `
+                <div class="room-card-header">
+                    <h4>غرفة ${roomNumber}</h4>
+                    <span class="room-status ${isActive ? 'occupied' : 'vacant'}">
+                        ${isActive ? 'مشغولة' : 'شاغرة'}
+                    </span>
+                </div>
+                <ul class="room-details">
+                    <li><i class="fas fa-comment-dots"></i><span id="room-${roomNumber}-last-message">لا توجد رسائل</span></li>
+                    <li><i class="fas fa-concierge-bell"></i><span id="room-${roomNumber}-pending-orders">0 طلبات معلقة</span></li>
+                </ul>
+            `;
+            roomsContainer.appendChild(roomCard);
+        }
+        activeRoomsStat.textContent = activeRoomsCount;
     }
-    
-    function listenForRooms() {
-        const activeUsersRef = db.ref('active_users');
-        activeUsersRef.on('value', (snapshot) => {
-            const activeUsers = snapshot.val() || {};
-            const activeRoomNumbers = Object.keys(activeUsers).map(key => key.replace('room_', ''));
+
+    // --- Messages Logic ---
+    function renderMessages(messagesData) {
+        if (!messagesContainer) return;
+        messagesContainer.innerHTML = '';
+        let newMessagesCount = 0;
+
+        const allMessages = [];
+        for (const roomKey in messagesData) {
+             const roomMessages = messagesData[roomKey].comments;
+             if(roomMessages) {
+                 for(const msgId in roomMessages) {
+                     allMessages.push({ ...roomMessages[msgId], roomKey, msgId, type: 'comment' });
+                 }
+             }
+             const roomReplies = messagesData[roomKey].replies;
+             if(roomReplies) {
+                 for(const replyId in roomReplies) {
+                     allMessages.push({ ...roomReplies[replyId], roomKey, replyId, type: 'reply' });
+                 }
+             }
+        }
+
+        allMessages.sort((a, b) => b.timestamp - a.timestamp);
+        
+        const latestUserMessages = {};
+        for(const message of allMessages) {
+            if(message.type === 'comment' && !latestUserMessages[message.roomKey]) {
+                latestUserMessages[message.roomKey] = message;
+            }
+        }
+        
+        Object.values(latestUserMessages).forEach(message => {
+            if (!message.isRead) newMessagesCount++;
             
-            // Assuming total rooms from 101 to 120 for example
-            const totalRooms = Array.from({length: 20}, (_, i) => 101 + i); 
-            
-            roomsList.innerHTML = '';
-            totalRooms.forEach(roomNumber => {
-                const isOccupied = activeRoomNumbers.includes(roomNumber.toString());
-                const roomElement = document.createElement('div');
-                roomElement.className = `room-card ${isOccupied ? 'occupied' : 'vacant'}`;
-                roomElement.innerHTML = `
-                    <div class="room-number">غرفة ${roomNumber}</div>
-                    <div class="room-status">${isOccupied ? 'مشغولة' : 'شاغرة'}</div>
-                `;
-                roomsList.appendChild(roomElement);
+            const messageItem = document.createElement('div');
+            messageItem.className = `message-item ${!message.isRead ? 'unread' : ''}`;
+            messageItem.dataset.room = message.roomKey;
+            messageItem.dataset.id = message.msgId;
+
+            const roomNumber = message.roomKey.replace('room_', '');
+            const time = new Date(message.timestamp).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+
+            let ratingHtml = '';
+            if (message.rating) {
+                ratingHtml = `<div class="message-rating">` + '★'.repeat(message.rating) + '☆'.repeat(5 - message.rating) + `</div>`;
+            }
+
+            messageItem.innerHTML = `
+                <div class="message-header">
+                    <span class="room-number">غرفة ${roomNumber} - ${message.guestName || ''}</span>
+                    <span class="message-time">${time}</span>
+                </div>
+                <div class="message-body">
+                    <p>${message.text}</p>
+                    ${ratingHtml}
+                </div>
+                <div class="message-actions">
+                    <button class="reply-btn"><i class="fas fa-reply"></i> رد</button>
+                </div>
+            `;
+            messagesContainer.appendChild(messageItem);
+
+             // Update last message in room card
+            const lastMessageSpan = document.getElementById(`room-${roomNumber}-last-message`);
+            if (lastMessageSpan) {
+                lastMessageSpan.textContent = message.text.substring(0, 30) + '...';
+            }
+        });
+
+        newMessagesStat.textContent = newMessagesCount;
+        updateBadge(newMessagesCountBadge, newMessagesCount);
+
+        document.querySelectorAll('.message-item .reply-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const messageItem = e.target.closest('.message-item');
+                const roomKey = messageItem.dataset.room;
+                const messageId = messageItem.dataset.id;
+                const guestMessage = messageItem.querySelector('.message-body p').textContent;
+                
+                openReplyModal({
+                    type: 'message',
+                    roomKey,
+                    messageId,
+                    guestMessage,
+                    roomNumber: roomKey.replace('room_', '')
+                });
+
+                // Mark as read
+                db.ref(`rooms/${roomKey}/comments/${messageId}/isRead`).set(true);
             });
         });
     }
 
-    function listenForOrders() {
-        const ordersRef = db.ref('rooms');
-        ordersRef.on('child_added', (roomSnapshot) => handleRoomForOrder(roomSnapshot));
-        ordersRef.on('child_changed', (roomSnapshot) => handleRoomForOrder(roomSnapshot));
-    }
-    
-    function handleRoomForOrder(roomSnapshot) {
-        const roomData = roomSnapshot.val();
-        const roomKey = roomSnapshot.key;
-        const roomNumber = roomKey.replace('room_', '');
+    // --- Orders Logic ---
+    function renderOrder(orderId, orderData) {
+        const roomNumber = orderData.roomKey.replace('room_', '');
+        const time = new Date(orderData.timestamp).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: 'digit' });
 
-        if (roomData.comments) {
-            Object.entries(roomData.comments).forEach(([commentId, comment]) => {
-                if (comment.type === 'Food Order') {
-                    const orderId = `order_${roomKey}_${commentId}`;
-                    if (!document.getElementById(orderId)) {
-                        createOrderCard(orderId, roomNumber, comment, commentId);
-                        showNotification(`طلب طعام جديد من غرفة ${roomNumber}`);
-                    }
-                }
-            });
+        const orderCard = document.createElement('div');
+        orderCard.className = `order-card ${orderData.status}`;
+        orderCard.id = `order-${orderId}`;
+        orderCard.dataset.id = orderId;
+        orderCard.dataset.roomKey = orderData.roomKey;
+        
+        let itemsHtml = '';
+        if (orderData.text) {
+             itemsHtml = orderData.text.split(',').map(item => `<li>${item.trim()}</li>`).join('');
         }
-    }
-
-    function createOrderCard(orderId, roomNumber, order, commentId) {
-        const card = document.createElement('div');
-        card.className = 'order-card new-order';
-        card.id = orderId;
-        const timestamp = new Date(order.timestamp).toLocaleTimeString('ar-EG');
-
-        card.innerHTML = `
+       
+        orderCard.innerHTML = `
             <div class="order-header">
                 <span class="room-number">غرفة ${roomNumber}</span>
-                <span class="order-time">${timestamp}</span>
+                <span class="order-time">${time}</span>
             </div>
-            <div class="order-body">
-                <p><strong>الاسم:</strong> ${order.guestName || 'غير محدد'}</p>
-                <p><strong>الطلب:</strong> ${order.text}</p>
-                <p><strong>الإجمالي:</strong> ${order.total} جم</p>
+            <div class="order-details">
+                <ul>${itemsHtml}</ul>
+                ${orderData.total ? `<div class="order-total">الإجمالي: ${orderData.total.toFixed(2)} ج.م</div>` : ''}
             </div>
             <div class="order-actions">
-                <button class="action-btn start-processing">بدء التنفيذ</button>
-                <button class="action-btn complete-order">إتمام الطلب</button>
+                ${orderData.status === 'new' ? '<button class="start-btn"><i class="fas fa-play"></i> بدء التنفيذ</button>' : ''}
+                ${orderData.status === 'in-progress' ? '<button class="complete-btn"><i class="fas fa-check"></i> إتمام الطلب</button>' : ''}
+                <button class="reply-btn"><i class="fas fa-reply"></i> رد على النزيل</button>
             </div>
         `;
         
-        newOrdersContainer.prepend(card);
-
-        card.querySelector('.start-processing').addEventListener('click', () => {
-            card.classList.remove('new-order');
-            card.classList.add('in-progress-order');
-            inProgressOrdersContainer.prepend(card);
-            updateOrderStatusInDB(roomNumber, commentId, 'in-progress');
-        });
-
-        card.querySelector('.complete-order').addEventListener('click', () => {
-            card.classList.remove('in-progress-order', 'new-order');
-            card.classList.add('completed-order');
-            completedOrdersContainer.prepend(card);
-            updateOrderStatusInDB(roomNumber, commentId, 'completed');
-        });
+        return orderCard;
     }
     
-    function updateOrderStatusInDB(roomNumber, commentId, status) {
-        const commentRef = db.ref(`rooms/room_${roomNumber}/comments/${commentId}`);
-        commentRef.update({ order_status: status });
-    }
+    function placeOrderInColumn(orderCard, status) {
+        if (status === 'new') newOrdersContainer.prepend(orderCard);
+        else if (status === 'in-progress') inProgressOrdersContainer.prepend(orderCard);
+        else if (status === 'completed') completedOrdersContainer.prepend(orderCard);
+        
+        // Attach event listeners
+        const startBtn = orderCard.querySelector('.start-btn');
+        if (startBtn) startBtn.addEventListener('click', () => updateOrderStatus(orderCard.dataset.id, 'in-progress'));
 
-    function listenForMessages() {
-        const roomsRef = db.ref('rooms');
-        roomsRef.on('child_added', (roomSnapshot) => handleRoomForMessage(roomSnapshot));
-        roomsRef.on('child_changed', (roomSnapshot) => handleRoomForMessage(roomSnapshot));
-    }
-    
-    function handleRoomForMessage(roomSnapshot) {
-        const roomData = roomSnapshot.val();
-        const roomKey = roomSnapshot.key;
-        const roomNumber = roomKey.replace('room_', '');
+        const completeBtn = orderCard.querySelector('.complete-btn');
+        if (completeBtn) completeBtn.addEventListener('click', () => updateOrderStatus(orderCard.dataset.id, 'completed'));
 
-        if(roomData.comments || roomData.replies) {
-             const existingCard = document.querySelector(`.chat-summary-card[data-room='${roomNumber}']`);
-             if(existingCard) existingCard.remove();
-             
-             const card = document.createElement('div');
-             card.className = 'chat-summary-card';
-             card.setAttribute('data-room', roomNumber);
-
-             const allMessages = [];
-             if (roomData.comments) {
-                Object.values(roomData.comments).forEach(c => allMessages.push(c));
-             }
-              if (roomData.replies) {
-                Object.values(roomData.replies).forEach(r => allMessages.push(r));
-             }
-             allMessages.sort((a,b) => a.timestamp - b.timestamp);
-             const lastMessage = allMessages[allMessages.length-1];
-
-             card.innerHTML = `<div class="room-number">غرفة ${roomNumber}</div>
-                             <p class="last-message">${lastMessage.text}</p>
-                             <span class="message-time">${new Date(lastMessage.timestamp).toLocaleTimeString('ar-EG')}</span>`;
-             
-             chatList.prepend(card);
-
-             card.addEventListener('click', () => openChatModal(roomNumber, roomData));
-        }
-    }
-    
-    function openChatModal(roomNumber, roomData) {
-        const modal = document.getElementById('chat-modal');
-        const content = document.getElementById('chat-modal-content');
-        const closeBtn = document.getElementById('chat-modal-close');
-        const messageContainer = document.getElementById('chat-messages');
-        const replyInput = document.getElementById('chat-reply-input');
-        const sendReplyBtn = document.getElementById('chat-send-reply');
-
-        content.querySelector('h2').textContent = `المحادثة مع غرفة ${roomNumber}`;
-        messageContainer.innerHTML = '';
-
-        const allMessages = [];
-        if (roomData.comments) {
-            Object.values(roomData.comments).forEach(msg => allMessages.push({ ...msg, role: 'user' }));
-        }
-        if (roomData.replies) {
-            Object.values(roomData.replies).forEach(msg => allMessages.push({ ...msg, role: 'admin' }));
-        }
-
-        allMessages.sort((a, b) => a.timestamp - b.timestamp);
-
-        allMessages.forEach(msg => {
-            const msgElement = document.createElement('div');
-            msgElement.className = `chat-bubble ${msg.role}`;
-            msgElement.innerHTML = `<p>${msg.text}</p><span class="timestamp">${new Date(msg.timestamp).toLocaleTimeString('ar-EG')}</span>`;
-            messageContainer.appendChild(msgElement);
+        orderCard.querySelector('.reply-btn').addEventListener('click', () => {
+             openReplyModal({
+                type: 'order',
+                roomKey: orderCard.dataset.roomKey,
+                orderId: orderCard.dataset.id,
+                guestMessage: `بخصوص طلبك رقم ${orderCard.dataset.id.slice(-4)}`,
+                roomNumber: orderCard.dataset.roomKey.replace('room_', '')
+            });
         });
+    }
 
-        sendReplyBtn.onclick = () => {
-            const replyText = replyInput.value.trim();
-            if (replyText) {
-                const repliesRef = db.ref(`rooms/room_${roomNumber}/replies`);
-                const newReply = {
-                    text: replyText,
-                    timestamp: firebase.database.ServerValue.TIMESTAMP
-                };
-                push(repliesRef, newReply);
-                replyInput.value = '';
+    function updateOrderStatus(orderId, newStatus) {
+        db.ref(`orders/${orderId}/status`).set(newStatus);
+    }
+    
+    function updateOrderStats(orders) {
+        const orderCounts = { new: 0, 'in-progress': 0, completed: 0 };
+        const pendingOrdersByRoom = {};
+
+        Object.values(orders).forEach(order => {
+            if (order.status) {
+                orderCounts[order.status]++;
+                if (order.status === 'new' || order.status === 'in-progress') {
+                    const roomNumber = order.roomKey.replace('room_', '');
+                    pendingOrdersByRoom[roomNumber] = (pendingOrdersByRoom[roomNumber] || 0) + 1;
+                }
             }
+        });
+        
+        newOrdersStat.textContent = orderCounts.new;
+        updateBadge(newOrdersCountBadge, orderCounts.new);
+
+        document.querySelectorAll('[id$="-pending-orders"]').forEach(span => span.textContent = '0 طلبات معلقة');
+        for(const roomNumber in pendingOrdersByRoom) {
+            const span = document.getElementById(`room-${roomNumber}-pending-orders`);
+            if (span) {
+                span.textContent = `${pendingOrdersByRoom[roomNumber]} طلبات معلقة`;
+            }
+        }
+    }
+
+
+    // --- Firebase Listeners ---
+    function setupListeners() {
+        const roomsRef = db.ref('rooms');
+        const activeUsersRef = db.ref('active_users');
+        const ordersRef = db.ref('orders');
+
+        let roomsData = {};
+        let activeUsersData = {};
+        let ordersData = {};
+        
+        let initialOrdersLoaded = false;
+        
+        // Listen for all data changes
+        db.ref().on('value', snapshot => {
+            const allData = snapshot.val() || {};
+            roomsData = allData.rooms || {};
+            activeUsersData = allData.active_users || {};
+            
+            // Initial render
+            renderRooms(roomsData, activeUsersData);
+            renderMessages(roomsData);
+
+            // Handle orders separately for real-time updates
+        }, error => console.error(error));
+
+        // Orders listener for granular updates
+        ordersRef.on('child_added', (snapshot) => {
+            const orderId = snapshot.key;
+            const orderData = snapshot.val();
+            ordersData[orderId] = orderData;
+            
+            const orderCard = renderOrder(orderId, orderData);
+            placeOrderInColumn(orderCard, orderData.status);
+
+            if (initialOrdersLoaded && orderData.status === 'new') {
+                playNotificationSound();
+                orderCard.classList.add('newly-added');
+            }
+            updateOrderStats(ordersData);
+        });
+        
+        ordersRef.on('child_changed', (snapshot) => {
+            const orderId = snapshot.key;
+            const orderData = snapshot.val();
+            ordersData[orderId] = orderData;
+            
+            const existingCard = document.getElementById(`order-${orderId}`);
+            if (existingCard) existingCard.remove();
+            
+            const newCard = renderOrder(orderId, orderData);
+            placeOrderInColumn(newCard, orderData.status);
+            updateOrderStats(ordersData);
+        });
+
+        ordersRef.on('child_removed', (snapshot) => {
+            const orderId = snapshot.key;
+            delete ordersData[orderId];
+            const existingCard = document.getElementById(`order-${orderId}`);
+            if (existingCard) existingCard.remove();
+            updateOrderStats(ordersData);
+        });
+        
+        ordersRef.once('value', () => {
+            initialOrdersLoaded = true;
+        });
+    }
+
+    // --- Modal Logic ---
+    function openReplyModal(context) {
+        currentReplyContext = context;
+        replyModalTitle.textContent = `الرد على نزيل غرفة ${context.roomNumber}`;
+        modalGuestMessage.innerHTML = `<p>${context.guestMessage}</p>`;
+        replyMessageTextarea.value = '';
+        replyModal.style.display = 'block';
+    }
+
+    function closeReplyModal() {
+        replyModal.style.display = 'none';
+        currentReplyContext = null;
+    }
+
+
+    closeModalBtn.addEventListener('click', closeReplyModal);
+    window.addEventListener('click', (e) => {
+        if (e.target == replyModal) {
+            closeReplyModal();
+        }
+    });
+
+    sendReplyBtn.addEventListener('click', () => {
+        if (!currentReplyContext || !replyMessageTextarea.value.trim()) return;
+
+        const { roomKey } = currentReplyContext;
+        const repliesRef = db.ref(`rooms/${roomKey}/replies`);
+        
+        const newReply = {
+            text: replyMessageTextarea.value,
+            timestamp: firebase.database.ServerValue.TIMESTAMP,
+            isRead: false
         };
 
-        modal.style.display = 'flex';
-        closeBtn.onclick = () => modal.style.display = 'none';
-    }
+        repliesRef.push(newReply)
+            .then(() => {
+                console.log('Reply sent successfully');
+                closeReplyModal();
+            })
+            .catch(error => console.error('Failed to send reply:', error));
+    });
+    
+    // Initialize
+    setupListeners();
+    switchTab('dashboard-section'); // Start on dashboard
 });
