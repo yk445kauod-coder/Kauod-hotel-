@@ -6,6 +6,7 @@ import './globals.css';
 import { Analytics } from "@vercel/analytics/react";
 import { LoaderProvider } from '@/context/loader-context';
 import { PageLoader } from '@/components/layout/page-loader';
+import { LanguageModalManager } from '@/components/layout/language-modal-manager';
 
 export const metadata: Metadata = {
   title: 'فندق قاعود | Kaoud Hotel',
@@ -34,6 +35,7 @@ export default function RootLayout({
           <LanguageProvider>
             <UserProvider>
               <PageLoader />
+              <LanguageModalManager />
               {children}
               <Toaster />
               <Analytics />

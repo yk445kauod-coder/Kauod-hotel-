@@ -89,6 +89,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         remove(ref(db, `/active_users/room_${user.roomNumber}`));
       }
       localStorage.removeItem('hotel_user');
+      localStorage.removeItem('language_selected');
       setUserState({ roomNumber: null, name: null, phone: null });
       router.push('/login');
   }

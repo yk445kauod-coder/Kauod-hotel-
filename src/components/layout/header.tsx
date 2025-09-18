@@ -26,7 +26,7 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur-sm">
+    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur-sm no-print">
       <div className="container mx-auto flex h-16 items-center justify-between">
         <LoadingLink href="/" className="flex items-center gap-3">
           <Image src="https://ik.imagekit.io/iz3ll61i9/IMG-20250718-WA0019.jpg" alt="Kaoud Hotel Logo" width={40} height={40} className="rounded-full" />
