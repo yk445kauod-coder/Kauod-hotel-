@@ -7,12 +7,13 @@ import { menuData, type MenuItem } from "@/lib/data";
 import { useTranslation } from "@/hooks/use-translation";
 import { useLanguage } from "@/hooks/use-language";
 import { Button } from "@/components/ui/button";
-import { Download, Printer, ShoppingCart, Send, Plus, Minus } from "lucide-react";
-import { useRef, useState } from "react";
+import { Download, Printer, ShoppingCart, Send, Plus, Minus, ArrowUp } from "lucide-react";
+import { useRef, useState, useEffect } from "react";
 import html2canvas from "html2canvas";
 import { useToast } from "@/hooks/use-toast";
 import { submitServiceRequestAction } from "@/lib/actions";
 import { useUser } from "@/context/user-context";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 import {
   Dialog,
@@ -49,6 +50,25 @@ export default function MenuPage() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const { user } = useUser();
   const [isLoading, setIsLoading] = useState(false);
+  const [showScroll, setShowScroll] = useState(false);
+  const categoryRefs = useRef<{[key: string]: HTMLElement | null}>({});
+
+  const checkScrollTop = () => {
+    if (!showScroll && window.pageYOffset > 400){
+      setShowScroll(true)
+    } else if (showScroll && window.pageYOffset <= 400){
+      setShowScroll(false)
+    }
+  };
+  
+  const scrollTop = () =>{
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  };
+
+  useEffect(() => {
+    window.addEventListener('scroll', checkScrollTop)
+    return () => window.removeEventListener('scroll', checkScrollTop)
+  }, [showScroll]);
 
 
   const handleAddToCart = (item: MenuItem) => {
@@ -80,7 +100,6 @@ export default function MenuPage() {
   
   const handleCheckout = async () => {
     if (!user.roomNumber) {
-        // This should not happen due to the layout redirect, but as a fallback
         toast({ title: t('services.error_title'), description: t('services.enter_room_number_first'), variant: 'destructive' });
         return;
     }
@@ -101,7 +120,6 @@ export default function MenuPage() {
     formData.append('total', total.toString());
     formData.append('type', 'Food Order');
 
-
     const result = await submitServiceRequestAction(formData);
 
     setIsLoading(false);
@@ -113,7 +131,6 @@ export default function MenuPage() {
       toast({ title: t('services.error_title'), description: result.error, variant: 'destructive' });
     }
   };
-
 
   const totalItems = Array.from(cart.values()).reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = Array.from(cart.values()).reduce((sum, item) => sum + (item.item.price * item.quantity), 0);
@@ -139,13 +156,17 @@ export default function MenuPage() {
       document.body.removeChild(link);
     }
   };
+  
+  const handleTabClick = (categoryId: string) => {
+    categoryRefs.current[categoryId]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   return (
     <div className="bg-gradient-to-br from-cream to-[#f5f1e6] py-10 px-4 print-container" dir={language === 'ar' ? 'rtl' : 'ltr'}>
        {totalItems > 0 && (
          <Dialog open={isCartOpen} onOpenChange={setIsCartOpen}>
           <DialogTrigger asChild>
-            <Button className="fixed bottom-20 md:bottom-8 right-4 md:right-8 h-16 w-16 rounded-full bg-primary text-primary-foreground shadow-lg z-50 flex items-center justify-center">
+            <Button className="fixed bottom-24 md:bottom-8 right-4 md:right-8 h-16 w-16 rounded-full bg-primary text-primary-foreground shadow-lg z-50 flex items-center justify-center">
               <ShoppingCart className="h-7 w-7" />
               <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs rounded-full h-6 w-6 flex items-center justify-center">{totalItems}</span>
             </Button>
@@ -183,6 +204,10 @@ export default function MenuPage() {
         </Dialog>
       )}
 
+      <Button onClick={scrollTop} className={`fixed bottom-24 md:bottom-8 left-4 md:left-8 h-14 w-14 rounded-full bg-accent text-accent-foreground shadow-lg z-50 transition-opacity duration-300 ${showScroll ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+          <ArrowUp className="h-7 w-7" />
+      </Button>
+
       <div ref={menuContainerRef} className="container mx-auto bg-white/95 rounded-2xl shadow-2xl border border-gold overflow-hidden">
         <header className="relative text-center p-10 border-b-4 border-gold">
            <div className="absolute inset-0 bg-cover bg-center opacity-15" style={{backgroundImage: "url('https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070')"}}></div>
@@ -201,9 +226,26 @@ export default function MenuPage() {
             </Button>
         </div>
 
+        <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-sm p-2 no-print">
+           <Tabs defaultValue={menuData[0].id} className="w-full">
+              <TabsList className="w-full" scrollable>
+                {menuData.map(category => (
+                   <TabsTrigger key={category.id} value={category.id} onClick={() => handleTabClick(category.id)}>
+                      {language === 'ar' ? category.name : category.en_name}
+                   </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+        </div>
+
         <main className="p-4 md:p-8">
             {menuData.map((category) => (
-            <section key={category.id} className="mb-12">
+            <section 
+              key={category.id} 
+              id={category.id} 
+              ref={(el) => (categoryRefs.current[category.id] = el)} 
+              className="mb-12 pt-4 -mt-4 scroll-mt-24"
+            >
                 <div className="relative h-64 w-full rounded-lg overflow-hidden mb-6 shadow-lg border border-gold">
                     <Image src={category.image} alt={language === 'ar' ? category.name : category.en_name} fill style={{objectFit: "cover"}} className="transform transition-transform duration-500 hover:scale-105" />
                 </div>
@@ -237,5 +279,7 @@ export default function MenuPage() {
     </div>
   );
 }
+
+    
 
     
