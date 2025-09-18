@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -52,35 +52,30 @@ export function ChatInterface() {
   };
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex flex-1 flex-col bg-muted/20">
       <ScrollArea className="flex-1 overflow-y-auto" viewportRef={scrollViewportRef}>
-        <div className="space-y-6 p-4">
+        <div className="space-y-4 p-4">
           {messages.map((message, index) => (
             <div
               key={index}
-              className={`flex items-start gap-3 ${
-                message.role === "user" ? "justify-end" : ""
+              className={`flex items-end gap-2 ${
+                message.role === "user" ? "justify-end" : "justify-start"
               }`}
             >
-              {message.role === "bot" && (
+               {message.role === "bot" && (
                 <Avatar className="h-8 w-8">
                   <AvatarFallback><Bot /></AvatarFallback>
                 </Avatar>
               )}
               <div
-                className={`max-w-xs rounded-lg p-3 text-sm md:max-w-md ${
+                className={`max-w-md rounded-lg p-3 text-sm shadow-md ${
                   message.role === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted"
+                    ? "rounded-br-none bg-primary text-primary-foreground"
+                    : "rounded-bl-none bg-card text-card-foreground"
                 }`}
               >
                 <p style={{ whiteSpace: "pre-wrap" }}>{message.content}</p>
               </div>
-              {message.role === "user" && (
-                <Avatar className="h-8 w-8">
-                   <AvatarFallback><User /></AvatarFallback>
-                </Avatar>
-              )}
             </div>
           ))}
           {isLoading && (
@@ -88,14 +83,14 @@ export function ChatInterface() {
                 <Avatar className="h-8 w-8">
                   <AvatarFallback><Bot /></AvatarFallback>
                 </Avatar>
-                <div className="max-w-xs rounded-lg p-3 text-sm md:max-w-md bg-muted flex items-center">
+                <div className="max-w-xs rounded-lg p-3 text-sm md:max-w-md bg-card flex items-center shadow-md">
                     <Loader2 className="h-5 w-5 animate-spin"/>
                 </div>
             </div>
           )}
         </div>
       </ScrollArea>
-      <div className="border-t p-4">
+      <div className="border-t bg-background p-4">
         <div className="relative">
           <Input
             value={input}
@@ -108,11 +103,11 @@ export function ChatInterface() {
           <Button
             type="submit"
             size="icon"
-            className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
+            className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 bg-primary hover:bg-primary/90"
             onClick={handleSend}
             disabled={isLoading || !input.trim()}
           >
-            <Send className="h-4 w-4" />
+            <Send className="h-4 w-4 text-primary-foreground" />
             <span className="sr-only">{t('chat.send')}</span>
           </Button>
         </div>

@@ -150,90 +150,84 @@ export default function ServiceRequestPage() {
 
   return (
     <div className="flex flex-col h-full font-body bg-cream" dir={language === 'ar' ? 'rtl' : 'ltr'}>
-        <div className="container mx-auto p-0 md:p-4 flex-1 flex flex-col">
-           <div className="flex-1 flex flex-col bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
-               <header className="p-4 border-b">
-                  <h2 className="text-xl font-bold text-primary">{t('services.title_chat')} - {t('admin.table.room')} {user.roomNumber}</h2>
-               </header>
-               
-               <ScrollArea className="flex-1 overflow-y-auto" viewportRef={scrollViewportRef}>
-                 <div className="p-4">
-                 {isInitialLoad ? (
-                    <div className="flex justify-center items-center h-full">
-                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="container mx-auto p-0 md:p-4 flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col bg-card rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+          <header className="p-4 border-b bg-background">
+            <h2 className="text-xl font-bold text-primary">{t('services.title_chat')} - {t('admin.table.room')} {user.roomNumber}</h2>
+          </header>
+          
+          <ScrollArea className="flex-1 bg-muted/20 overflow-y-auto" viewportRef={scrollViewportRef}>
+            <div className="p-4 space-y-4">
+              {isInitialLoad ? (
+                <div className="flex justify-center items-center h-full">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : (
+                messages.map((message) => (
+                  <div key={message.id} className={`flex items-end gap-2 ${ message.role === 'user' ? 'justify-end' : 'justify-start' }`}>
+                    {(message.role === 'admin') && (
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback><Bot /></AvatarFallback>
+                      </Avatar>
+                    )}
+                    <div className={`flex flex-col max-w-md ${message.role === 'user' ? 'items-end' : 'items-start'}`}>
+                      <div className={`p-3 rounded-lg shadow-md text-sm ${
+                        message.role === 'user'
+                          ? 'bg-primary text-primary-foreground rounded-br-none'
+                          : 'bg-background text-foreground rounded-bl-none'
+                      }`}>
+                        <p style={{ whiteSpace: "pre-wrap" }}>{message.text}</p>
+                        {message.rating && (
+                          <div className="flex items-center mt-2 border-t border-white/20 pt-2">
+                            {[...Array(5)].map((_, i) => (
+                              <Star key={i} className={`w-4 h-4 ${i < message.rating! ? 'text-gold fill-gold' : 'text-gray-300' }`} />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1 px-1">{formatTimestamp(message.timestamp)}</p>
                     </div>
-                  ) : (
-                    <div className="space-y-6">
-                        {messages.map((message) => (
-                             <div key={message.id} className={`flex items-end gap-3 ${ message.role === 'user' ? 'justify-end' : '' }`}>
-                                {(message.role === 'admin') && (
-                                    <Avatar className="h-8 w-8">
-                                        <AvatarFallback><Bot /></AvatarFallback>
-                                    </Avatar>
-                                )}
-                                <div className={`max-w-md rounded-lg p-3 text-sm ${
-                                     message.role === 'user'
-                                        ? 'bg-primary text-primary-foreground'
-                                        : 'bg-muted'
-                                }`}>
-                                     <p style={{ whiteSpace: "pre-wrap" }}>{message.text}</p>
-                                     {message.rating && (
-                                         <div className="flex items-center mt-2">
-                                            {[...Array(5)].map((_, i) => (
-                                                 <Star key={i} className={`w-4 h-4 ${i < message.rating! ? 'text-gold fill-gold' : 'text-gray-300' }`} />
-                                            ))}
-                                        </div>
-                                     )}
-                                     <p className="text-xs text-right mt-1 opacity-70">{formatTimestamp(message.timestamp)}</p>
-                                </div>
-                                {message.role === 'user' && (
-                                    <Avatar className="h-8 w-8">
-                                        <AvatarFallback><UserIcon /></AvatarFallback>
-                                    </Avatar>
-                                )}
-                             </div>
-                        ))}
-                    </div>
-                 )}
-                 </div>
-               </ScrollArea>
-               
-               <footer className="p-4 border-t bg-gray-50">
-                    <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-                         <div className="flex items-center">
-                            <label className="text-sm font-bold text-rich-brown me-4">{t('services.form.rating')}</label>
-                            <div className="flex flex-row-reverse justify-end items-center">
-                                {[5, 4, 3, 2, 1].map((star) => (
-                                    <label key={star} className="cursor-pointer">
-                                        <input type="radio" name="star" value={star} className="hidden" onClick={() => setRating(star)} />
-                                        <Star
-                                            onMouseEnter={() => setHoverRating(star)}
-                                            onMouseLeave={() => setHoverRating(0)}
-                                            className={`w-6 h-6 transition-colors ${(hoverRating || rating) >= star ? 'text-gold' : 'text-gray-300'}`}
-                                            fill={(hoverRating || rating) >= star ? 'currentColor' : 'none'}
-                                        />
-                                    </label>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="relative">
-                            <Input 
-                                value={input}
-                                onChange={(e) => setInput(e.target.value)}
-                                placeholder={t('services.form.message_placeholder')}
-                                className="pr-12"
-                                disabled={isLoading}
-                            />
-                             <Button type="submit" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8" disabled={isLoading || !input.trim()}>
-                                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                                <span className="sr-only">{t('services.form.submit')}</span>
-                            </Button>
-                        </div>
-                    </form>
-               </footer>
-           </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </ScrollArea>
+          
+          <footer className="p-4 border-t bg-background">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+              <div className="flex items-center">
+                <label className="text-sm font-bold text-accent me-4">{t('services.form.rating')}</label>
+                <div className="flex flex-row-reverse justify-end items-center">
+                  {[5, 4, 3, 2, 1].map((star) => (
+                    <label key={star} className="cursor-pointer">
+                      <input type="radio" name="star" value={star} className="hidden" onClick={() => setRating(star)} />
+                      <Star
+                        onMouseEnter={() => setHoverRating(star)}
+                        onMouseLeave={() => setHoverRating(0)}
+                        className={`w-6 h-6 transition-colors ${(hoverRating || rating) >= star ? 'text-gold' : 'text-gray-300'}`}
+                        fill={(hoverRating || rating) >= star ? 'hsl(var(--primary))' : 'none'}
+                      />
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="relative">
+                <Input 
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder={t('services.form.message_placeholder')}
+                  className="pr-12"
+                  disabled={isLoading}
+                />
+                <Button type="submit" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 bg-primary hover:bg-primary/90" disabled={isLoading || !input.trim()}>
+                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4 text-primary-foreground" />}
+                  <span className="sr-only">{t('services.form.submit')}</span>
+                </Button>
+              </div>
+            </form>
+          </footer>
         </div>
+      </div>
     </div>
   );
 }
