@@ -48,7 +48,7 @@ export default function ServiceRequestPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const scrollViewportRef = useRef<HTMLDivElement>(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
 
@@ -101,10 +101,10 @@ export default function ServiceRequestPage() {
   }, [user.roomNumber]);
   
    useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTo({
-        top: scrollAreaRef.current.scrollHeight,
-        behavior: "smooth",
+    if (scrollViewportRef.current) {
+        scrollViewportRef.current.scrollTo({
+            top: scrollViewportRef.current.scrollHeight,
+            behavior: "smooth",
       });
     }
   }, [messages]);
@@ -156,7 +156,8 @@ export default function ServiceRequestPage() {
                   <h2 className="text-xl font-bold text-primary">{t('services.title_chat')} - {t('admin.table.room')} {user.roomNumber}</h2>
                </header>
                
-               <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
+               <ScrollArea className="flex-1 overflow-y-auto" viewportRef={scrollViewportRef}>
+                 <div className="p-4">
                  {isInitialLoad ? (
                     <div className="flex justify-center items-center h-full">
                       <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -194,6 +195,7 @@ export default function ServiceRequestPage() {
                         ))}
                     </div>
                  )}
+                 </div>
                </ScrollArea>
                
                <footer className="p-4 border-t bg-gray-50">

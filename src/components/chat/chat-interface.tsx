@@ -18,13 +18,13 @@ export function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const scrollViewportRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslation();
 
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTo({
-        top: scrollAreaRef.current.scrollHeight,
+    if (scrollViewportRef.current) {
+      scrollViewportRef.current.scrollTo({
+        top: scrollViewportRef.current.scrollHeight,
         behavior: "smooth",
       });
     }
@@ -53,8 +53,8 @@ export function ChatInterface() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
-        <div className="space-y-6">
+      <ScrollArea className="flex-1 overflow-y-auto" viewportRef={scrollViewportRef}>
+        <div className="space-y-6 p-4">
           {messages.map((message, index) => (
             <div
               key={index}
