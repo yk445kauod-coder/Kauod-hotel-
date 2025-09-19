@@ -32,7 +32,7 @@
   "dashboard": {
     "title": "Welcome to Kauod Hotel",
     "welcome_user": "Welcome, {{name}}",
-    "subtitle": "A luxury hotel in the heart of Alexandria offering a distinguished stay and high-end services.",
+    "subtitle": "Distinguished accommodation and premium services.",
     "book_now": "Request Service Now",
     "our_services": "Our Services",
     "services_subtitle": "We are here to make your stay unforgettable. Explore our services designed for your comfort.",
@@ -42,7 +42,7 @@
     "menu_card_desc": "Explore our delicious and carefully prepared dishes.",
     "services_card_title": "Requests & Services",
     "services_card_desc": "Need something? Request a service or food directly from your room.",
-    "learn_more": "Learn More",
+    "view_button": "View",
     "hotel_features": "Hotel Features"
   },
   "features": {

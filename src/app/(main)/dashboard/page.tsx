@@ -55,7 +55,7 @@ export default function DashboardPage() {
           <h1 className="text-4xl font-bold font-headline tracking-tight text-gold text-shadow-md">
             {user.name ? t('dashboard.welcome_user', { name: user.name }) : t('dashboard.title')}
           </h1>
-          <p className="mt-2 max-w-xl text-lg text-white/90 text-shadow">{t('hotel.description')}</p>
+          <p className="mt-2 max-w-xl text-lg text-white/90 text-shadow">{t('dashboard.subtitle')}</p>
         </div>
       </section>
 
@@ -67,17 +67,17 @@ export default function DashboardPage() {
             {featureCards.map((feature) => {
               const Icon = feature.icon;
               return (
-                <Card key={feature.href} className="text-center transform transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg bg-card border-primary/10">
+                <Card key={feature.href} className="flex flex-col text-center transform transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg bg-card border-primary/10">
                    <CardHeader className="items-center pt-6">
                     <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground">
                       <Icon className="h-7 w-7" />
                     </div>
                     <CardTitle className="font-headline text-primary text-xl">{t(feature.titleKey)}</CardTitle>
                   </CardHeader>
-                  <CardContent className="pt-0 pb-6">
+                  <CardContent className="flex flex-col flex-1 pt-0 pb-6">
                     <CardDescription className="mb-4 h-10">{t(feature.descriptionKey)}</CardDescription>
-                    <Button asChild variant="link" className="text-primary font-bold">
-                       <LoadingLink href={feature.href}>{t('dashboard.learn_more')}</LoadingLink>
+                    <Button asChild className="mt-auto w-full bg-gradient-to-b from-accent to-dark-brown text-accent-foreground font-bold text-base py-3 px-6 rounded-lg shadow-md hover:shadow-lg transform transition-all duration-150 ease-in-out active:shadow-inner active:translate-y-px active:bg-dark-brown">
+                       <LoadingLink href={feature.href}>{t('dashboard.view_button')}</LoadingLink>
                     </Button>
                   </CardContent>
                 </Card>
