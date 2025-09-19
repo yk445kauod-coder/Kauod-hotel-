@@ -1,3 +1,4 @@
+
 "use client";
 
 import LoadingLink from "@/components/layout/loading-link";
@@ -46,8 +47,8 @@ export default function DashboardPage() {
       {/* Hero Section */}
       <section className="relative h-64 w-full">
         <Image
-          src="https://ik.imagekit.io/iz3ll61i9/IMG-20250718-WA0013.jpg?updatedAt=1752865961674"
-          alt="Hotel Room"
+          src="https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070"
+          alt="Hotel Lounge"
           fill
           className="object-cover"
         />
