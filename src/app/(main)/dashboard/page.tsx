@@ -50,7 +50,7 @@ export default function DashboardPage() {
           src="https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070"
           alt="Hotel Lounge"
           fill
-          className="object-cover"
+          className="object-cover blur-sm"
         />
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white bg-black/50 p-4">
           <h1 className="text-4xl font-bold font-headline tracking-tight text-gold text-shadow-md">
