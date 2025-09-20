@@ -47,8 +47,8 @@ export default function DashboardPage() {
       {/* Hero Section */}
       <section className="relative h-64 w-full">
         <Image
-          src="https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070"
-          alt="Hotel Lounge"
+          src="https://images.unsplash.com/photo-1542314831-068cd1dbb5eb?q=80&w=2070"
+          alt="Hotel Lobby"
           fill
           className="object-cover blur-sm"
         />

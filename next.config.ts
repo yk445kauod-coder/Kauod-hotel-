@@ -38,7 +38,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  output: "export" // Changed from standalone to export
 };
 
 export default nextConfig;
