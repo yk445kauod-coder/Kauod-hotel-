@@ -1,8 +1,9 @@
+
 "use client";
 
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getDatabase, ref, onDisconnect, set, serverTimestamp, remove } from 'firebase/database';
 
 interface User {
@@ -21,16 +22,16 @@ interface UserContextType {
 }
 
 const firebaseConfig = {
-    apiKey: "AIzaSyApgrwfyrVJYsihy9tUwPfazdNYZPqWbow",
-    authDomain: "kaoud-hotel.firebaseapp.com",
-    databaseURL: "https://kaoud-hotel-default-rtdb.firebaseio.com",
-    projectId: "kaoud-hotel",
-    storageBucket: "kaoud-hotel.appspot.com",
-    messagingSenderId: "77309702077",
-    appId: "1:77309702077:web:1eee14c06204def2eb6cd4"
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
-const app = initializeApp(firebaseConfig);
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 export const UserContext = createContext<UserContextType | undefined>(undefined);

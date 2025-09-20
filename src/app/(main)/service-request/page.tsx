@@ -1,10 +1,11 @@
+
 "use client";
 
 import { useEffect, useState, useRef, FormEvent } from 'react';
 import { useLanguage } from '@/hooks/use-language';
 import { useTranslation } from '@/hooks/use-translation';
 import { useUser } from '@/context/user-context';
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getDatabase, ref, onChildAdded, serverTimestamp, push, off, get, child } from "firebase/database";
 import { Star, Send, Loader2, Bot, User as UserIcon } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -15,16 +16,16 @@ import { submitServiceRequestAction } from '@/lib/actions';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 const firebaseConfig = {
-    apiKey: "AIzaSyApgrwfyrVJYsihy9tUwPfazdNYZPqWbow",
-    authDomain: "kaoud-hotel.firebaseapp.com",
-    databaseURL: "https://kaoud-hotel-default-rtdb.firebaseio.com",
-    projectId: "kaoud-hotel",
-    storageBucket: "kaoud-hotel.appspot.com",
-    messagingSenderId: "77309702077",
-    appId: "1:77309702077:web:1eee14c06204def2eb6cd4"
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
-const app = initializeApp(firebaseConfig);
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 type Message = {
